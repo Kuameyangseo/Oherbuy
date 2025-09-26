@@ -2,6 +2,7 @@
   "compilerOptions": {
     "composite": true,
     "declarationMap": true,
+    "baseUrl": ".",
     "emitDeclarationOnly": true,
     "importHelpers": true,
     "isolatedModules": true,
@@ -16,6 +17,10 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
+    "path": {
+      "@package/*": 
+      ["packages/*"],
+    },
     "customConditions": ["@oherb/source"]
   }
 }
