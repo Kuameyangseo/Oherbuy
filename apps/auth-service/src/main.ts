@@ -25,7 +25,6 @@ app.get('/', (req, res) => {
 
 app.use(cookieParser());
 app.use(express.json());
-app.use(errorMiddleware);
 
 //swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -35,6 +34,7 @@ app.get("/docs-json", (req, res) => {
 
 //routes
 app.use("/api", router);
+app.use(errorMiddleware);
 
 
 const port = process.env.PORT || 6001;

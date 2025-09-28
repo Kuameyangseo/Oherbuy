@@ -28,7 +28,6 @@ model users {
   name      String?
   password  String
   updatedAt DateTime @updatedAt
-  imagesId String? @db.ObjectId @unique
   avatar   images?
   following String[]
 }
