@@ -3,6 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan'; 
 import cookieParser from 'cookie-parser'; 
 import rateLimit from 'express-rate-limit';
+import { ipKeyGenerator } from 'express-rate-limit';
 import proxy from 'express-http-proxy';
 
 const app = express();
@@ -26,7 +27,11 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true, 
   legacyHeaders: false, 
-  keyGenerator: (req: any) => req.ip, // Use IP address as the key
+  keyGenerator: (req, res) => {
+    // Use API key (or some other identifier) for authenticated users
+    if (req.query.apiKey) return String(req.query.apiKey);
+    return String(ipKeyGenerator(req.ip ?? '')); // better
+  }
 });
 
 app.use(limiter);
@@ -39,7 +44,7 @@ app.use("/", proxy("http://localhost:6001"));
 
 const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
-  console.log(`Listening at http://localhost:${port}/api`);
+  console.log(`API gateway is running at http://localhost:${port}/api-gateway`);
 });
 server.on('error', console.error);
   

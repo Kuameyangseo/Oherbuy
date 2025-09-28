@@ -1,13 +1,17 @@
+// filepath: /home/m-h-d/Documents/Oherbuy/apps/auth-service/tsconfig.json
 {
   "extends": "../../tsconfig.base.json",
   "files": [],
-  "include": [],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.json"
+  ],
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  },
   "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.spec.json" }
   ]
 }

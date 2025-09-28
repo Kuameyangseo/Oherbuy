@@ -17,10 +17,6 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "paths": {
-      "@package/*": 
-      ["packages/*"],
-    },
     "customConditions": ["@oherb/source"]
   }
 }

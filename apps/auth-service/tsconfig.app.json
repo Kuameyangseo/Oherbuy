@@ -7,11 +7,14 @@
       "express"
     ],
     "rootDir": "../../",
-    "tsBuildInfoFile": "out-tsc/auth-service/tsconfig.app.tsbuildinfo"
+    "tsBuildInfoFile": "out-tsc/auth-service/tsconfig.app.tsbuildinfo",
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
   "include": [
     "src/**/*.ts",
-    "../../packages/**/*.ts"
+    "../../packages/**/*.ts",
+    "src/**/*.json"
   ],
   "exclude": [
     "out-tsc",

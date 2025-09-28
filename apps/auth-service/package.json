@@ -2,6 +2,9 @@
   "name": "@oherb/auth-service",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "dev": "node src/main.ts"
+  },
   "nx": {
     "targets": {
       "build": {
@@ -20,7 +23,12 @@
           "main": "apps/auth-service/src/main.ts",
           "tsConfig": "apps/auth-service/tsconfig.app.json",
           "assets": [
-            "apps/auth-service/src/assets"
+            "apps/auth-service/src/assets",
+            {
+              "input": "apps/auth-service/src",
+              "glob": "swagger-output.json",
+              "output": "apps/auth-service/src"
+            }
           ],
           "esbuildOptions": {
             "sourcemap": true,
@@ -111,5 +119,8 @@
   },
   "dependencies": {
     "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/swagger-ui-express": "^4.1.8"
   }
 }
