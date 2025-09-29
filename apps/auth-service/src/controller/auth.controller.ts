@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import prisma from "../../../../packages/libs/prisma";
 import { ValidationError } from "../../../../packages/error-handler";
-import { checkOtpRestrictions, sendOtp, trackOtpRequests, validateRegistrationData, verifyOtp } from "../utils/auth.helper";
+import { checkOtpRestrictions, handlerForgotPassword, sendOtp, trackOtpRequests, validateRegistrationData, verifyOtp } from "../utils/auth.helper";
 import jwt from "jsonwebtoken";
 import { setCookie } from "../utils/cookies/setCookie";
 
@@ -127,5 +127,36 @@ export const loginUser = async(
 
     } catch (error) {
         return next(error);
+    }
+}
+
+export const userForgotPassword = async(
+    req:Request,
+    res:Response,
+    next:NextFunction
+) => {
+    await handlerForgotPassword(req, res, next, "user")
+};
+
+export const resetUserPassword = async(
+    req:Request,
+    rse:Response,
+    next:NextFunction
+) => {
+    try{
+        const {email, newPassword} = req.body;
+
+        if (!email || !newPassword)
+            return next (new ValidationError("Email and new password are required"));
+
+        const user = await prisma.users.findUnique({where: {email}});
+        if (!user) return next(new ValidationError("User not found!"));
+
+        const isSamePassword = await bcrypt.compare(newPassword, user.password!);
+        if (isSamePassword){
+            return next(new ValidationError(
+                "New password cannot be"
+            ))
+        }
     }
 }
