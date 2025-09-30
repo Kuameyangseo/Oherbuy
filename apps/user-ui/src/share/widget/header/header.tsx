@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import './static.css';
-import { Search } from 'lucide-react';
+import { HeartIcon, Search,UserRoundPlus, ShoppingCart } from 'lucide-react';
 
 
 const Header = () => {
@@ -21,6 +21,31 @@ const Header = () => {
             <Search className='icon-search'/>
            </div>
         </div>
+            <div className="profilePic">
+              <div className="mainProfile">
+                <Link href={"/login"} className='svgPic'>
+                 <UserRoundPlus />
+                </Link>
+              </div>
+              <Link href={"/login"} className='profileLink-col-1'>
+                <span className='profileLink'>Hello</span>
+                <span className='profileLink2'>Sign In</span>
+              </Link>
+            </div>
+            <div className="watchList-col-1">
+              <Link href={"/watchlist"} className='watchListLink'>
+              <HeartIcon/>
+              <div className="heartIcon">
+              <span>0</span>
+              </div>
+              </Link>
+              <Link href={"/cart"} className='watchListLink'>
+              <ShoppingCart />
+              <div className="heartIcon">
+              <span>0</span>
+              </div>
+              </Link>
+            </div>
       </div>
     </div>
   )

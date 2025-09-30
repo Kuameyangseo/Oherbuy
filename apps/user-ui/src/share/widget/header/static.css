@@ -1,6 +1,7 @@
 .navbar-col-1{
     width: 100%;
     background-color: #ffffff;
+    border-bottom: 0.2px solid rgba(51, 45, 45, 0.192);
 }
 
 .navbar-col-2{
@@ -46,4 +47,63 @@
 
 .icon-search{
     color: #ffffff;
+}
+
+.profilePic{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    cursor: pointer;}
+
+.profileLink{
+    font-weight: 600;
+}
+
+.lucide{
+    font-weight: 800;
+}
+
+.profileLink-col-1{
+    display: flex;
+    flex-direction: column;
+}
+
+.svgPic{
+    width: 45px;
+    height: 45px;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(61, 63, 65);
+}
+
+.watchListLink{
+    position: relative;
+}
+
+.heartIcon{
+    width: 15px;
+    height: 15px;
+    border-radius: 100%;
+    border: 1px solid wheat;
+    background-color: red;
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.heartIcon span{
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.watchList-col-1{
+    display: flex;
+    gap: 2rem;
 }
