@@ -27,7 +27,7 @@
     width: 100%;
     font: var(--font-poppins);
     padding: 0.5rem 1rem;
-    border: 2px solid #3b82f6;
+    border: 2px solid #15be23;
     outline: none;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
@@ -42,7 +42,7 @@
     top: 0;
     right: 0;
     cursor: pointer;
-    background-color: #3b82f6;
+    background-color: #15be23;
 }
 
 .icon-search{
@@ -88,7 +88,7 @@
     height: 15px;
     border-radius: 100%;
     border: 1px solid wheat;
-    background-color: red;
+    background-color: #15be23;
     position: absolute;
     top: -4px;
     right: -4px;
