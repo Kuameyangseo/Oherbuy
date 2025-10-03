@@ -2,6 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import './static.css';
 import { HeartIcon, Search,UserRoundPlus, ShoppingCart } from 'lucide-react';
+import HeaderButton from '../header/header-buttom';
 
 
 const Header = () => {
@@ -47,6 +48,8 @@ const Header = () => {
               </Link>
             </div>
       </div>
+      <div className='border-b border-b-slate-200'/>
+      <HeaderButton />
     </div>
   )
 }

@@ -1,7 +1,6 @@
 .navbar-col-1{
     width: 100%;
     background-color: #ffffff;
-    border-bottom: 0.2px solid rgba(51, 45, 45, 0.192);
 }
 
 .navbar-col-2{
@@ -106,4 +105,60 @@
 .watchList-col-1{
     display: flex;
     gap: 2rem;
+}
+
+.firstDropdown{
+  width: 100%;
+  display: flex;
+  transition:all;
+  transition-duration: 300ms;
+}
+
+.dropdown{
+    width: 80%;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 65px;
+
+}
+
+.dropbtn{
+    width: 260px;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 20px;
+    padding-right: 20px;
+    background-color: #15be23;
+    
+}
+
+.dropbtn-col-1{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dropbtn-col-1 span{
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.dropdown-bg{
+    width: 260px;
+    position: absolute;
+    left: 5;
+    top: 59px;
+    height: 400px;
+    background-color: rgb(240, 237, 231);
+}
+
+.navLinks{
+    display: flex;
+    gap: 2rem;
+    align-items: center;
 }
