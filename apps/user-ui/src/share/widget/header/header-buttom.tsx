@@ -1,8 +1,9 @@
 "use client"
 import { navItems} from 'apps/user-ui/src/configs/constants';
-import { AlignLeft, ChevronDown,} from 'lucide-react';
+import { AlignLeft, ChevronDown, HeartIcon, ShoppingCart,} from 'lucide-react';
 import React,{ useEffect,useState } from 'react'
 import Link from 'next/link';
+import { UserRoundPlus } from 'lucide-react';
 
 const HeaderButton = () => {
    const [show, setShow] = useState(false);
@@ -43,7 +44,7 @@ return (
         >
           <div className="dropbtn-col-1">
             <AlignLeft color="white" />
-            <span>All Department</span>
+            <span className='text-sm'>All Department</span>
           </div>
           <ChevronDown color="white" />
         </div>
@@ -59,7 +60,7 @@ return (
         <div className="navLinks">
           {navItems.map((i: NavItemsTypes, index: number) => (
             <Link
-              className="px-5 font-medium text-lg"
+              className="px-2 font-medium text-sm"
               href={i.href}
               key={index}
             >
@@ -67,11 +68,40 @@ return (
             </Link>
           ))}
         </div>
+        <div className='flex items-center justify-center gap-10'>
+          {isSticky && (
+            <>
+            <div className="profilePic">
+              <div className="mainProfile">
+                <Link href={"/login"} className='svgPic'>
+                  <UserRoundPlus />
+                </Link>
+              </div>
+              <Link href={"/login"} className='profileLink-col-1'>
+                <span className='profileLink'>Hello</span>
+                <span className='profileLink2'>Sign In</span>
+              </Link>
+            </div>
+            <div className="watchList-col-1">
+                <Link href={"/watchlist"} className='watchListLink'>
+                  <HeartIcon />
+                  <div className="heartIcon">
+                    <span>0</span>
+                  </div>
+                </Link>
+                <Link href={"/cart"} className='watchListLink'>
+                  <ShoppingCart />
+                  <div className="heartIcon">
+                    <span>0</span>
+                  </div>
+                </Link>
+              </div></>
+          )}
+        </div>
       </div>
     </div>
   </div>
 );
-// ...existing code...
 }
 
 export default HeaderButton;

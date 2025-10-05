@@ -41,7 +41,7 @@
     top: 0;
     right: 0;
     cursor: pointer;
-    background-color: #15be23;
+    background-color: green;
 }
 
 .icon-search{
@@ -69,8 +69,8 @@
 }
 
 .svgPic{
-    width: 45px;
-    height: 45px;
+    width: 40px;
+    height: 40px;
     border-radius: 100%;
     display: flex;
     align-items: center;
@@ -87,7 +87,7 @@
     height: 15px;
     border-radius: 100%;
     border: 1px solid wheat;
-    background-color: #15be23;
+    background-color: #008000;
     position: absolute;
     top: -4px;
     right: -4px;
@@ -126,14 +126,14 @@
 
 .dropbtn{
     width: 260px;
-    height: 50px;
+    height: 40px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding-left: 20px;
     padding-right: 20px;
-    background-color: #15be23;
+    background-color: green;
     
 }
 
@@ -152,8 +152,8 @@
     width: 260px;
     position: absolute;
     left: 5;
-    top: 59px;
-    height: 400px;
+    top: 58px;
+    height: 300px;
     background-color: rgb(240, 237, 231);
 }
 

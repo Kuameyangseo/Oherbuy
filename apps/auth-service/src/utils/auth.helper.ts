@@ -3,6 +3,7 @@ import { ValidationError } from "../../../../packages/error-handler"
 import { sendEmail } from "../utils/sendMail"
 import { NextFunction, Request, Response} from "express";
 import redis from "../../../../packages/libs/redis";
+import prismadb from "../../../../packages/libs/prisma";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -108,34 +109,37 @@ export const verifyOtp = async(
 
     await redis.del(`otp:${email}`, failedAttemptsKey);
 }
-
+ 
 export const handlerForgotPassword = async (
     req: Request,
     res: Response,
     next: NextFunction,
     userType: "user" | "seller"
 ) => {
-    try{
-      const { email } = req.body;
-      if(!email) throw new ValidationError("Email is required!");
+    try {
+        const { email } = req.body;
+        const user = userType === "user" && await prismadb.users.findUnique({ where: { email } });
+        if (!user) {
+            throw new ValidationError("User not found");
+        }
 
-      const user = userType === "user" && await prismadb.users.findUnique({ where: { email } });
-      if (!user) throw new ValidationError(`${userType} not found!`);
+        await checkOtpRestrictions(email, next);
+        if (res.headersSent) return;
 
-      await checkOtpRestrictions(email, next);
-      await trackOtpRequests(email, next);
+        await trackOtpRequests(email, next);
+        if (res.headersSent) return;
 
-      await sendOtp(user.name ?? "", email, "forgot-password-user-mail");
+        await sendOtp(user.name ?? "", email, "forgot-password-user-mail");
 
-      res.status(200).json({
-      message: "OTP sent to your email",
-});
-    } catch(error){
-        next(error)
+        res.status(200).json({
+            message: "OTP sent to your email",
+        });
+    } catch (error) {
+        next(error);
     }
 }
- 
- export const verifyForgotPasswordOtp = async(
+
+export const verifyForgotPasswordOtp = async(
     req: Request,
     res: Response,
     next: NextFunction,

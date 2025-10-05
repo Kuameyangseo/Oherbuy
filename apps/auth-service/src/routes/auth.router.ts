@@ -2,6 +2,7 @@ import express from 'express';
 import { loginUser, resetUserPassword, userForgotPassword, userRegistration, verifyUser } from '../controller/auth.controller';
 import { verifyForgotPasswordOtp } from '../utils/auth.helper';
 
+
 const router = express.Router();
 
 router.post("/user-registration", userRegistration);

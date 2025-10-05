@@ -22,31 +22,33 @@ const Header = () => {
             <Search className='icon-search'/>
            </div>
         </div>
-            <div className="profilePic">
-              <div className="mainProfile">
-                <Link href={"/login"} className='svgPic'>
-                 <UserRoundPlus />
-                </Link>
-              </div>
-              <Link href={"/login"} className='profileLink-col-1'>
-                <span className='profileLink'>Hello</span>
-                <span className='profileLink2'>Sign In</span>
-              </Link>
+        <div className='flex items-center justify-cent gap-10'>
+          <div className="profilePic">
+          <div className="mainProfile">
+            <Link href={"/login"} className='svgPic'>
+              <UserRoundPlus />
+            </Link>
+          </div>
+          <Link href={"/login"} className='profileLink-col-1'>
+            <span className='profileLink'>Hello</span>
+            <span className='profileLink2'>Sign In</span>
+          </Link>
+        </div>
+        <div className="watchList-col-1">
+          <Link href={"/watchlist"} className='watchListLink'>
+          <HeartIcon/>
+          <div className="heartIcon">
+          <span>0</span>
+          </div>
+          </Link>
+          <Link href={"/cart"} className='watchListLink'>
+            <ShoppingCart />
+            <div className="heartIcon">
+             <span>0</span>
             </div>
-            <div className="watchList-col-1">
-              <Link href={"/watchlist"} className='watchListLink'>
-              <HeartIcon/>
-              <div className="heartIcon">
-              <span>0</span>
-              </div>
-              </Link>
-              <Link href={"/cart"} className='watchListLink'>
-              <ShoppingCart />
-              <div className="heartIcon">
-              <span>0</span>
-              </div>
-              </Link>
-            </div>
+          </Link>
+        </div>
+        </div>
       </div>
       <div className='border-b border-b-slate-200'/>
       <HeaderButton />
