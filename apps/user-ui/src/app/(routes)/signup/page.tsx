@@ -3,10 +3,10 @@ import React, { useRef, useState } from 'react'
 import './pagestyle.css';
 import { useRouter } from 'next/navigation';
 import {useForm} from 'react-hook-form';
-import GoogleButton from '../../../share/components/google-button';
 import { Eye, EyeOff} from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import axios, { AxiosError } from "axios"
+import GoogleButton from 'apps/user-ui/src/share/components/google-button';
 
 
 type FormData = {
@@ -87,22 +87,31 @@ const Signup = () => {
     signupMutation.mutate(data)
    };
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (/^[0-9]$/.test(value) || value === "") {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
-      if (value && index < otp.length - 1) {
-        inputRefs.current[index + 1]?.focus();
-      }
-    }
-  };
+const handleOtpChange = (index: number, value: string) => {
+  if (/^[0-9]$/.test(value) || value === "") {
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
 
-  const handleOtpKeyDown = (index: number, event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
+    if (value && index < otp.length - 1) {
+      inputRefs.current[index + 1]?.focus();
     }
-  };
+
+    // Automatically verify OTP when all digits are entered
+    if (newOtp.every(digit => digit !== "")) {
+      verifyOtpMutation.mutate();
+    }
+  }
+};
+
+const handleOtpKeyDown = (index: number, event: React.KeyboardEvent<HTMLInputElement>) => {
+  if (event.key === "Backspace" && !otp[index] && index > 0) {
+    inputRefs.current[index - 1]?.focus();
+  }
+  if (event.key === "Enter") {
+    verifyOtpMutation.mutate();
+  }
+};
 
   return (
   <div className='w-full py-10 min-h-[85vh] bg-[#f1f1f1]'>

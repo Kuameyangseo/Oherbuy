@@ -1,6 +1,6 @@
 import './global.css';
 import Header from "../share/widget/header"
-import {Poppins, Roboto} from "next/font/google"
+import {Oswald, Poppins, Roboto} from "next/font/google"
 import Providers from '../providers';
 
 
@@ -19,7 +19,14 @@ const roboto = Roboto({
 const poppins = Poppins({
   subsets: ['latin'],
   weight: ['100','200','300','500','500','600','700','800','900'],
-  variable: '--font-poppins'
+  variable: '--font-poppins',
+  
+})
+
+const oswald = Oswald({
+    subsets: ['latin'],
+     weight: ['200','300','500','500','600','700'],
+     variable: "--font-oswald"
 })
 
 export default function RootLayout({
@@ -29,9 +36,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${roboto.variable} ${poppins.variable} font-sans`}>
-        <Header/>
+      <body className={`${roboto.variable} ${oswald.variable} ${poppins.variable} font-sans`}>
         <Providers>
+          <Header/>
           {children}
         </Providers>
         </body>

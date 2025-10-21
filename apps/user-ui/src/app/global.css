@@ -12,7 +12,7 @@ html {
   scroll-behavior: smooth;
 }
 body {
-  font-family: inherit;
+  font-family: var(--font-poppins);
   line-height: inherit;
   margin: 0;
 }

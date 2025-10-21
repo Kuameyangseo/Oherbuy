@@ -4,10 +4,10 @@ import './pagestyle.css';
 import Link from 'next/link'
 import { useRouter } from 'next/navigation';
 import {useForm} from 'react-hook-form';
-import GoogleButton from '../../../share/components/google-button';
 import { Eye, EyeOff} from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
+import GoogleButton from 'apps/user-ui/src/share/components/google-button';
 
 type formData = {
   email: string;

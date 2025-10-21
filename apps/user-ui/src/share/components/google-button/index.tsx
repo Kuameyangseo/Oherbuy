@@ -1,9 +1,14 @@
 import * as React from "react";
+
 const GoogleButton = () => {
+    const handleGoogleSignIn = () => {
+        window.location.href = `${process.env.NEXT_PUBLIC_SERVER_URI}/api/auth/google`;
+    };
+
     return (
-        <div className="googlebtn">
-            <div className="googlebtn-col-1">
-                <svg
+        <div className="googlebtn" onClick={handleGoogleSignIn} style={{ cursor: "pointer" }}>
+            <div className="googlebtn-col-1 flex items-center gap-2">
+                {<svg
                     id="Icons"
                     xmlns="http://www.w3.org/2000/svg"
                     xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -39,12 +44,11 @@ const GoogleButton = () => {
                         d="M28.5,6c-1.1-1.4-2.5-2.6-4-3.6C22,0.9,19.1,0,16,0C10.3,0,5.3,3,2.5,7.5l6.7,6.7c0.8-3,3.6-5.2,6.8-5.2 c0.6,0,1.2,0.1,1.8,0.3c0.9,0.3,1.7,0.8,2.6,1.5c0.3,0.3,0.7,0.3,1.1,0.1l6.7-3.3c0.3-0.1,0.5-0.4,0.5-0.7 C28.8,6.6,28.7,6.3,28.5,6z"
                     />
                     </g>
-                </svg>
+                </svg>}
                 <span>Sign in with Google</span>
             </div>
         </div>
-    )
-
-}
+    );
+};
 
 export default GoogleButton;

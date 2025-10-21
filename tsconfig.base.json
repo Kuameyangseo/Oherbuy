@@ -18,5 +18,8 @@
     "strict": true,
     "target": "es2022",
     "customConditions": ["@oherb/source"]
-  }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
 }
+

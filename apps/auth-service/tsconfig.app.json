@@ -9,7 +9,8 @@
     "rootDir": "../../",
     "tsBuildInfoFile": "out-tsc/auth-service/tsconfig.app.tsbuildinfo",
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*.ts",
