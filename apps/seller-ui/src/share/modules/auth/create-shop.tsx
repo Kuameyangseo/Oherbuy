@@ -74,7 +74,7 @@ const CreateShop = ({
         {errors.bio && <p className='text-red-500 text-sm mt-1 font-poppins'>{String(errors.bio.message)}</p>}
 
 
-        <label className='block mb-1 font-poppins'>Address * (Max 100 words) *</label>
+        <label className='block mb-1 font-poppins'>Address *</label>
         <input
           type='text'
           placeholder='Shop location'

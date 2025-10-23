@@ -3,7 +3,7 @@ import React from 'react'
 
 const Layout = ({children}:{children: React.ReactNode}) => {
   return (
-    <div className='flex h-full bg-black min-h-screen'>
+    <div className='flex h-full bg-gray-900 min-h-screen'>
         {/* sidebar */}
         <aside className='w-[280px] min-w-[250px] max-w-[300px] border-r-slate-800 text-white p-4'>
            <div  className="sticky top-0">

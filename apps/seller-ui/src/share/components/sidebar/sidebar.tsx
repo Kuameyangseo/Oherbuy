@@ -9,6 +9,7 @@ import { Sidebar } from './sidebar.style';
 import Link from 'next/link';
 import Logo from 'apps/seller-ui/src/assets/svgs/logo';
 
+
 const SidebarBarWrapper = () => {
   const {activeSidebar, setActiveSidebar} = useSidebar();
   const pathName = usePathname();
@@ -23,6 +24,7 @@ const SidebarBarWrapper = () => {
   return (
     <Box
     css={{
+      backgroundColor: "red",
       height: "100vh",
       zIndex: 202,
       position: "sticky",
@@ -33,7 +35,7 @@ const SidebarBarWrapper = () => {
     }}
     className='sidebar-wrapper'
     >
-    <Sidebar.Header>
+    <Sidebar.Header className=''>
       <Box>
         <Link href={"/"} className="flex justify-center text-center gap-2">
         <Logo />
@@ -44,4 +46,7 @@ const SidebarBarWrapper = () => {
   )
 }
 
+
+
 export default SidebarBarWrapper
+

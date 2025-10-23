@@ -6,6 +6,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import axios, { AxiosError } from "axios";
 import { countries } from 'apps/seller-ui/src/utils/countries';
+import CreateShop from 'apps/seller-ui/src/share/modules/auth/create-shop';
 // import next from 'next'; // Removed unused/incorrect import
 
 
@@ -18,7 +19,7 @@ type SellerFormData = {
 };
 
 const Signup = () => {
-  const [activeStep, setActiveStep] = useState(1);
+  const [activeStep, setActiveStep] = useState(2);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [canResend, setCanResend] = useState(true);
   const [timer, setTimer] = useState(60);
@@ -340,6 +341,9 @@ const connectHubtel = async () => {
               </div>
             )}
             </>
+           )}
+           {activeStep == 2 && (
+            <CreateShop sellerId={sellerId!} setActiveStep={setActiveStep} />
            )}
            {activeStep == 3 && (
               <div>

@@ -29,6 +29,7 @@ const Login = () => {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URI}/api/login-seller`, 
         data,
         { withCredentials: true }
+        
       );
       return response.data;
     },

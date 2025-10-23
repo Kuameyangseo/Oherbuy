@@ -1,7 +1,7 @@
 'use client'
 import styled from "styled-components";
 
-export const sidebarWrapper = styled.div`
+export const sidebarBarWrapper = styled.div`
  background-color: var(--background);
  transition: transform 0.2s ease;
  height: 100%;
@@ -62,6 +62,8 @@ export const Header = styled.div`
  align-items: center;
  padding-left: var(--space-10);
  padding-right: var(--space-10)
+  backgrong-color: green;
+
 `;
 
 //Body component
@@ -72,6 +74,7 @@ export const Body = styled.div`
  margin-top: var(--space-13);
  padding-left: var(--space-4);
  padding-right: var(--space-4);
+ backgrong-color: green;
 `; 
 
 export const Footer = styled.div`
