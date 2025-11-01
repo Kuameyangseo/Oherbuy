@@ -1,7 +1,6 @@
 import './global.css';
 import {Oswald, Poppins, Roboto} from "next/font/google"
 import Providers from '../providers';
-import Head from 'next/head';
 
 
 
@@ -37,9 +36,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <Head>
-        <script src="https://js.paystack.co/v1/inline.js"></script>
-      </Head>
       <body className={`min-h-screen ${roboto.variable} ${oswald.variable} ${poppins.variable} font-sans`}>
         <Providers>
           {children}

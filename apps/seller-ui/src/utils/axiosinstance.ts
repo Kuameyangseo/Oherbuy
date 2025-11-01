@@ -1,64 +1,76 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_SERVER_URI,
-    withCredentials: true
+  baseURL: process.env.NEXT_PUBLIC_SERVER_URI || 'http://localhost:8080',
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
 });
 
 let isRefreshing = false;
-let refreshSubscribers: ((token: string) => void)[] = [];
+let refreshSubscribers: ((value?: any) => void)[] = [];
 
 const handleLogout = () => {
-    if (window.location.pathname !== '/login') {
-        window.location.href = '/login'; // Redirect to login page
-    }
+  if (window.location.pathname !== '/login') {
+    window.location.href = '/login';
+  }
 };
 
-const subscribeTokenRefresh = (callback: (token: string) => void) => {
-    refreshSubscribers.push(callback);
-}
+const subscribeTokenRefresh = (cb: (value?: any) => void) => {
+  refreshSubscribers.push(cb);
+};
 
-const onRefreshSuccess = (token: string) => {
-    refreshSubscribers.forEach(callback => callback(token));
-    refreshSubscribers = [];
-}
+const onRefreshSuccess = (accessToken?: string) => {
+  refreshSubscribers.forEach(cb => cb(accessToken));
+  refreshSubscribers = [];
+};
 
 axiosInstance.interceptors.response.use(
-    response => response,
-    async (error) => {
-        const originalRequest = error.config;
-        if (error.response && error.response.status === 401 && !originalRequest._retry) {
-            if (isRefreshing) {
-                return new Promise((resolve) => {
-                    subscribeTokenRefresh((token: string) => {
-                        resolve(axiosInstance(originalRequest));
-                    });
-                });
-            }
-            originalRequest._retry = true;
-            isRefreshing = true;
-            try {
-                await axios.post(
-                    `${process.env.NEXT_PUBLIC_SERVER_URI}/api/refresh-token`, 
-                     {}, 
-                     { withCredentials: true }
-                );
+  response => response,
+  async (error) => {
+    const originalRequest = error.config;
+    if (!originalRequest) return Promise.reject(error);
 
-                isRefreshing = false;
-                onRefreshSuccess('');
-
-                return axiosInstance(originalRequest);
-            } catch (err) {
-                isRefreshing = false;
-                refreshSubscribers = [];
-                handleLogout();
-                return Promise.reject(err);
-            } finally {
-                isRefreshing = false;
+    const status = error.response?.status;
+    if (status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          subscribeTokenRefresh((accessToken?: string) => {
+            // if server returned an access token, attach it to the retried request
+            if (accessToken) {
+              originalRequest.headers = originalRequest.headers || {};
+              originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
             }
+            resolve(axiosInstance(originalRequest));
+          });
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // use axiosInstance so baseURL and defaults apply; withCredentials ensures cookies are sent
+        const res = await axiosInstance.post('/api/refresh-token', {}, { withCredentials: true });
+
+        // If server returns a new access token in body, set default header and pass it to subscribers
+        const accessToken = res?.data?.accessToken;
+        if (accessToken) {
+          axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
         }
-        return Promise.reject(error);
+
+        onRefreshSuccess(accessToken);
+        return axiosInstance(originalRequest);
+      } catch (err) {
+        refreshSubscribers = [];
+        handleLogout();
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
+      }
     }
+
+    return Promise.reject(error);
+  }
 );
-    
+
 export default axiosInstance;

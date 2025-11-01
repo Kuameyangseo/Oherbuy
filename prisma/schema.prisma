@@ -24,7 +24,7 @@ model images{
 }
 
 model users {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @map("_id") @db.ObjectId @default(cuid())
   createdAt DateTime @default(now())
   email     String   @unique
   name      String?
@@ -33,7 +33,6 @@ model users {
   avatar   images?
   following String[]
   shopReviews shopReviews[]
-  phone_number String
   country   String
 }
 
@@ -62,11 +61,10 @@ model shops{
   socialLinks Json[]
   ratings Float @default(0)
   reviews shopReviews[]
-  sellerId String @unique @db.ObjectId
+  sellerId String? @unique @db.ObjectId   // changed to optional
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  sellers sellers @relation(fields: [sellerId], references: [id])
-  
+  seller sellers? @relation(fields: [sellerId], references: [id])
 }
 model sellers {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -78,9 +76,7 @@ model sellers {
   updatedAt DateTime @updatedAt
   phone_number String
   stripeId String
-  shopId  String?@db.ObjectId
-  shopsId String?
-  shop shops[]
+  shop    shops?
   paystackSubaccount String?
 }
 

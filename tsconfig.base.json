@@ -17,7 +17,11 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@oherb/source"]
+    "customConditions": ["@oherb/source"],
+    "paths": {
+      "@oherb/components": ["packages/components"],
+      "@oherb/components/*": ["packages/components/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist"]

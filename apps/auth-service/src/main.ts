@@ -10,7 +10,6 @@ import swaggerDocument from './swagger-output.json';
 // "resolveJsonModule": true,
 // "esModuleInterop": true
 
-
 const app = express();
 
 app.use(cors({
@@ -19,6 +18,9 @@ app.use(cors({
   credentials: true,
 }));
 
+
+app.use(cookieParser());
+app.use(express.json());
 
 app.get('/', (req, res) => {
     res.send({ 'message': 'Hello API'});
@@ -33,9 +35,14 @@ app.get("/docs-json", (req, res) => {
     res.json(swaggerDocument);
 });
 
+
+
+
+
 //routes
 app.use("/api", router);
 app.use(errorMiddleware);
+
 
 
 const port = process.env.PORT || 6001;

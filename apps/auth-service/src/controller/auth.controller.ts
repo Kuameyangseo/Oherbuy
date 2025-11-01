@@ -5,6 +5,7 @@ import { ValidationError } from "../../../../packages/error-handler";
 import { checkOtpRestrictions, handlerForgotPassword, sendOtp, trackOtpRequests, validateRegistrationData, verifyOtp, verifyUserForgotPasswordOtp } from "../utils/auth.helper";
 import jwt from "jsonwebtoken";
 import { setCookie } from "../utils/cookies/setCookie";
+import axios from "axios";
 
 
 
@@ -63,7 +64,6 @@ export const verifyUser = async(
                 name,
                 email,
                 password: hashedPassword,
-                phone_number,
                 country,
             }
         });
@@ -102,6 +102,10 @@ export const loginUser = async(
             return next(new ValidationError("Invalid credentials"));
         }
 
+
+        res.clearCookie("seller-access-token");
+        res.clearCookie("seller-refresh-token");
+
         const accessToken = jwt.sign(
             {id: user.id, role: "user"},
             process.env.ACCESS_TOKEN_SECRET as string,
@@ -117,8 +121,8 @@ export const loginUser = async(
               expiresIn: "7d",
             }
         );
-        setCookie(res, "access_token", accessToken);
-        setCookie(res, "refresh_token", refreshToken);
+        setCookie(res, "access-token", accessToken);
+        setCookie(res, "refresh-token", refreshToken);
 
         res.status(200).json({
             success: true,
@@ -136,11 +140,14 @@ export const loginUser = async(
 }
 
 //Refresh Token
-export const refreshToken = async(req:Request, res:Response, next:NextFunction) => {
+export const refreshToken = async(
+    req:any, 
+    res:Response, 
+    next:NextFunction) => {
     try{
         const refreshToken = 
-        req.cookies['refresh_token'] ||
-        req.cookies['seller-refresh_token'] ||
+        req.cookies['refresh-token'] ||
+        req.cookies['seller-refresh-token'] ||
         req.headers.authorization?.split(" ")[1];
 
         if (!refreshToken) {
@@ -152,41 +159,46 @@ export const refreshToken = async(req:Request, res:Response, next:NextFunction) 
             process.env.REFRESH_TOKEN_SECRET as string
         ) as {id: string, role: string};
 
-        if (!decoded || !decoded.id ||decoded.role !== "user") {
+        // allow both user and seller roles
+        if (!decoded || !decoded.id || (decoded.role !== "user" && decoded.role !== "seller")) {
             return next(new ValidationError("Invalid token role"));
         }
 
         let account;
         if (decoded.role === "user") {
-            account = await prisma.users.findUnique({where: {id: decoded.id}});
-        }else if (decoded.role === "seller") {
+            account = await prisma.users.findUnique({
+               where: {id: decoded.id}});
+        } else if (decoded.role === "seller") {
             account = await prisma.sellers.findUnique({
-            where: {id: decoded.id},
-            include: { shop: true }
-         });
+                where: {id: decoded.id},
+                include: { shop: true }
+            });
         }
             
         if (!account) {
-            return next(new ValidationError("User not found"));
+            return next(new ValidationError("Forbidden! User/seller not found"));
         }
 
-            const newAccessToken = jwt.sign(
-                {id: account.id, role: "user"},
-                process.env.ACCESS_TOKEN_SECRET as string,
-                {expiresIn: "15m"}
-            );
+        // create a single new access token preserving the role
+        const newAccessToken = jwt.sign(
+            {id: account.id, role: decoded.role},
+            process.env.ACCESS_TOKEN_SECRET as string,
+            {expiresIn: "15m"}
+        );
 
-            if (decoded.role === "user") {
-                setCookie(res, "access_token", newAccessToken);
-            } else if (decoded.role === "seller") {
-                setCookie(res, "seller-access_token", newAccessToken);
-            }
-            return res.status(200).json({message: "Token refreshed successfully"});
-        } catch(error){
-            return next(error);
+        if (decoded.role === "user") {
+            setCookie(res, "access-token", newAccessToken);
+        } else if (decoded.role === "seller") {
+            setCookie(res, "seller-access-token", newAccessToken);
         }
+
+        req.role = decoded.role;
+
+        return res.status(200).json({message: "Token refreshed successfully"});
+    } catch(error){
+        return next(error);
+    }
 };
-
 
 export const getUser = async(req:any, res:Response, next:NextFunction) => {
     try{
@@ -246,6 +258,7 @@ export const resetUserPassword = async(
     }
 }
 
+/*-----------SELLER-UI CONTROLLERS--------------------- */
 
 // Register new seller
 export const registerSeller = async (
@@ -371,20 +384,25 @@ export const loginSeller = async(
             return next(new ValidationError("All fields are required"));
         }
 
-        const user = await prisma.users.findUnique({where: { email }});
+        const seller = await prisma.sellers.findUnique({where: { email }});
 
-        if (!user){
-            return next(new ValidationError("User does not exist with this email"));
+        if (!seller){
+            return next(new ValidationError("Seller does not exist with this email"));
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await bcrypt.compare(password, seller.password);
 
         if (!isPasswordValid){
             return next(new ValidationError("Invalid credentials"));
         }
 
+
+        res.clearCookie("access-token");
+        res.clearCookie("refresh-token");
+
+
         const accessToken = jwt.sign(
-            {id: user.id, role: "user"},
+            {id: seller.id, role: "seller"},
             process.env.ACCESS_TOKEN_SECRET as string,
             {
               expiresIn: "15m"
@@ -392,22 +410,22 @@ export const loginSeller = async(
         );
 
         const refreshToken = jwt.sign(
-            {id: user.id, role: "user"},
+            {id: seller.id, role: "seller"},
             process.env.REFRESH_TOKEN_SECRET as string,
             {
               expiresIn: "7d",
             }
         );
-        setCookie(res, "seller-access_token", accessToken);
-        setCookie(res, "seller-refresh_token", refreshToken);
+        setCookie(res, "seller-access-token", accessToken);
+        setCookie(res, "seller-refresh-token", refreshToken);
 
         res.status(200).json({
             success: true,
             message: "Login successful",
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
+            seller: {
+                id: seller.id,
+                name: seller.name,
+                email: seller.email,
             }
         });
 
@@ -416,22 +434,31 @@ export const loginSeller = async(
     }
 }
 
-export const getSeller = async(
-    req:any, 
-    res:Response, 
-    next:NextFunction) => {
-    try{
-        const seller = req.user;
-        res.status(201).json({
-         success: true,
-         seller,
-        });
-    }catch(error){
-        return next(error);
-    }
-};
 
-import axios from "axios";
+
+export const getSeller = async (req: any, res: Response, next: NextFunction) => {
+  try {
+    // determine seller id set by auth middleware
+    const sellerId = req.seller?.id || req.user?.id || req.params?.id;
+    if (!sellerId) {
+      return next(new ValidationError("Seller id not provided"));
+    }
+
+    // fetch seller from DB including the shop relation so frontend receives seller.shop.name
+    const seller = await prisma.sellers.findUnique({
+      where: { id: sellerId },
+      include: { shop: true },
+    });
+
+    if (!seller) {
+      return next(new ValidationError("Seller not found"));
+    }
+
+    return res.status(200).json({ success: true, seller });
+  } catch (error) {
+    return next(error);
+  }
+};
 
 export const createHubtelPayout = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -466,3 +493,19 @@ export const createHubtelPayout = async (req: Request, res: Response, next: Next
   }
 };
 
+// Logout handler: clears both user and seller auth cookies
+export const logout = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Clear user tokens
+    res.clearCookie("access-token");
+    res.clearCookie("refresh-token");
+
+    // Clear seller tokens
+    res.clearCookie("seller-access-token");
+    res.clearCookie("seller-refresh-token");
+
+    return res.status(200).json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    return next(error);
+  }
+};

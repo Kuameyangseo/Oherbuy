@@ -7,7 +7,7 @@ import { useMutation } from '@tanstack/react-query';
 import axios, { AxiosError } from "axios";
 import { countries } from 'apps/seller-ui/src/utils/countries';
 import CreateShop from 'apps/seller-ui/src/share/modules/auth/create-shop';
-// import next from 'next'; // Removed unused/incorrect import
+import { useRouter } from 'next/navigation';
 
 
 type SellerFormData = {
@@ -19,7 +19,11 @@ type SellerFormData = {
 };
 
 const Signup = () => {
-  const [activeStep, setActiveStep] = useState(2);
+  const router = useRouter();
+  const handleSkip = () => {
+    router.push('/dashboard');
+  };
+  const [activeStep, setActiveStep] = useState(1);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [canResend, setCanResend] = useState(true);
   const [timer, setTimer] = useState(60);
@@ -57,8 +61,6 @@ const Signup = () => {
 
   
 
-// ...existing code...
-
 const signupMutation = useMutation({
   mutationFn: async (data: SellerFormData) => {
     const response = await axios.post(
@@ -75,7 +77,6 @@ const signupMutation = useMutation({
     resendOtp();
   }
 });
-// ...existing code...
 
   const verifyOtpMutation = useMutation({
     mutationFn: async() => {
@@ -383,13 +384,23 @@ const connectHubtel = async () => {
                   className='w-full px-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4'
                   placeholder='Enter payout amount'
                 />
-                <button
-                  className='w-full m-auto flex items-center justify-center gap-3 text-lg bg-slate-500 text-white py-2 rounded-lg hover:bg-slate-600 transition-colors font-poppins'
-                  onClick={connectHubtel}
-                  type='button'
-                >
-                  Connect with Hubtel Momo
-                </button>
+                <div className='flex gap-3'>
+                  <button
+                    className='flex-1 m-auto flex items-center justify-center gap-3 text-lg bg-slate-500 text-white py-2 rounded-lg hover:bg-slate-600 transition-colors font-poppins'
+                    onClick={connectHubtel}
+                    type='button'
+                  >
+                    Connect with Hubtel Momo
+                  </button>
+
+                  <button
+                    className='flex-1 m-auto flex items-center justify-center gap-3 text-lg bg-transparent border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-100 transition-colors font-poppins'
+                    onClick={handleSkip}
+                    type='button'
+                  >
+                    Skip for now
+                  </button>
+                </div>
               </div>
            )}
         </div>

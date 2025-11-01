@@ -24,13 +24,21 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"]
+    },
+    "outDir": "../../dist/apps/seller-ui",
+    "rootDir": "../../",
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
   "include": [
     "**/*.js",
     "**/*.jsx",
     "**/*.ts",
     "**/*.tsx",
+    "../../packages/**/*.{ts,tsx}",
     "../../apps/seller-ui/.next/types/**/*.ts",
     "../../dist/apps/seller-ui/.next/types/**/*.ts",
     "next-env.d.ts",

@@ -124,18 +124,14 @@ export const handlerForgotPassword = async (
         const user = 
          userType === "user" 
           ? await prismadb.users.findUnique({ where: { email } }) 
-          : await prismadb.users.findUnique({ where: { email } });
+          : await prismadb.sellers.findUnique({ where: { email } });
 
         if (!user) {
             throw new ValidationError(`${userType} not found!`);
         }
 
         await checkOtpRestrictions(email, next);
-        if (res.headersSent) return;
-
         await trackOtpRequests(email, next);
-        if (res.headersSent) return;
-
         await sendOtp(user.name ?? "", email, userType == "user" ? "forgot-password-user-mail" : "forgot-password-seller-mail");
 
         res.status(200).json({

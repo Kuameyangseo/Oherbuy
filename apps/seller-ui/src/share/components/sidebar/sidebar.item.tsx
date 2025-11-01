@@ -1,5 +1,5 @@
-import { Link } from 'lucide-react'
 import React from 'react'
+import Link from 'next/link'
 
 
 interface Props {
@@ -11,9 +11,14 @@ interface Props {
 
 const sidebarItem = ({icon, title, isActive, href}: Props) => {
   return (
-    <Link href={href} className='my-2 block'>
+    <Link href={href} 
+          className='my-2 block' 
+          style={
+            {height: "48px", 
+            width: "200px"
+            }}>
       <div
-      className={`flex gap-2 w-full min-h-12 h-full items-center px-[13px] rounded-lg curser-pointer transition hover:bg-[#2b2f31]
+      className={`flex gap-2 w-full min-h-12 h-full items-center px-[13px] rounded-lg cursor-pointer transition hover:bg-[#2b2f31]
         ${isActive &&
           "scale-[.98] bg-[#0f3258] fill-blue-200 hover:bg-[#053158d6]"
         }`}>

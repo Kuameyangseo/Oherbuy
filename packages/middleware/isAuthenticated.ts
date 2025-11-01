@@ -10,14 +10,17 @@ import prisma from "../../packages/libs/prisma";
 
 const isAuthenticated = async(req: any, res: Response, next: NextFunction) => {
     try {
-        const token = req.cookies.access_token|| req.cookies.seller_access_token || req.headers.authorization?.split(" ")[1];
+        const token = 
+        req.cookies["access-token"]|| 
+        req.cookies["seller-access-token"] || 
+        req.headers.authorization?.split(" ")[1];
 
         if (!token) {
             return res.status(401).json({ 
-              message: "Unauthorized" });
+              message: "Unauthorized token missing" });
         }
 
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string) as {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as {
              id: string; 
              role: "user" | "seller" };
 
@@ -52,7 +55,7 @@ const isAuthenticated = async(req: any, res: Response, next: NextFunction) => {
     
       return next();
     } catch (error) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "Unauthorized token expired or invalid" });
     }
 } 
 export default isAuthenticated;

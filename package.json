@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "seed:sellers": "ts-node apps/seller-ui/src/scripts/seed-seller.ts",
     "dev": "npx nx run-many --target=serve --all",
     "start": "npx nx serve auth-service",
     "docs": "npx node apps/auth-service/src/swagger.js",
@@ -12,7 +13,7 @@
   "private": true,
   "dependencies": {
     "@paystack/inline-js": "^2.22.7",
-    "@prisma/client": "^6.16.2",
+    "@prisma/client": "^6.18.0",
     "@tanstack/react-query": "^5.90.2",
     "@types/mongoose": "^5.11.96",
     "axios": "^1.6.0",
@@ -89,6 +90,7 @@
     "prettier": "^2.6.2",
     "react-refresh": "^0.10.0",
     "tailwindcss": "3.4.3",
+    "terser-brunch": "^4.1.0",
     "ts-jest": "^29.4.0",
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
@@ -96,6 +98,7 @@
     "webpack-cli": "^5.1.4"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ]
 }

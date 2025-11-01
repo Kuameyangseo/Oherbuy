@@ -8,6 +8,8 @@ const Box = styled.div.attrs<BoxProps>((props) => ({
     style:props.css,
 }))<BoxProps>`
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 `;
 
 export default Box;
