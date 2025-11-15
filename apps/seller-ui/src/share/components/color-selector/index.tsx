@@ -1,17 +1,17 @@
 import { Plus } from "lucide-react";
 import React, { useState } from "react";
-import { Controller, set } from "react-hook-form";
+import { Controller } from "react-hook-form";
 
 export const defaultColors: string[] = [
-    "#FFFFFF", // white
+    "#ffffff", // white
     "#000000", // black
-    "#FF4D4F", // red
-    "#52C41A", // green
-    "#1890FF", // blue
-    "#FAAD14", // orange
-    "#722ED1", // purple
-    "#13C2C2", // teal
-    "#BFBFBF", // gray
+    "#ff4d4f", // red
+    "#52c41a", // green
+    "#1890ff", // blue
+    "#faad14", // orange
+    "#722ed1", // purple
+    "#13c2c2", // teal
+    "#bfbfbf", // gray
 ];
 
 const ColorSelector = ({ control, errors}: any) => {
@@ -22,24 +22,35 @@ const ColorSelector = ({ control, errors}: any) => {
     return (
         <div className="mt-2">
             <label className="block mb-2 font-medium text-gray-700">Select Colors</label>
-            <Controller 
+            <Controller<any, any>
                 name="colors"
                 control={control}
-                render={({ field }) => (
+                defaultValue={[]}
+                render={({ field }: any) => (
                 <div className="flex flex-wrap gap-2">
                     {[...defaultColors, ...customColors].map((color) => {
-                        const isSelected = (field.value || []).includes(color);
-                        const isLightColor = ["#ffffff", "#ffff00"].includes(color);
+                        const lcColor = color.toLowerCase();
+                        const currentValues = ((field.value || []) as string[]).map((v: string) => (v || '').toLowerCase());
+                        const isSelected = currentValues.includes(lcColor);
+                        const isLightColor = ["#ffffff", "#ffff00"].includes(lcColor);
 
-                        return <button type="button" key={color}
-                        onClick={() => field.onChange(isSelected 
-                            ? field.value.filter((c:string) => c !== color) 
-                            : [...(field.value || [],color)]
-                        )}
+                        return <button type="button" key={lcColor}
+                        onClick={() => {
+                            const values = ((field.value || []) as string[]) || [];
+                            const normalized = values.map((v: string) => (v || '').toLowerCase());
+                            if (normalized.includes(lcColor)) {
+                              // deselect
+                              const next = values.filter((c: string) => (c || '').toLowerCase() !== lcColor);
+                              field.onChange(next);
+                            } else {
+                              // select
+                              field.onChange([...(values || []), lcColor]);
+                            }
+                        }}
                         className={`w-7 h-7 p-2 rounded-md my-1 flex items-center justify-center border-2 transition ${
                             isSelected ? "scale-110 border-white" : "border-transparent"  
                         } ${isLightColor ? "border-gray-400" : ""}`}
-                        style={{ backgroundColor: color }}
+                        style={{ backgroundColor: lcColor }}
                         >
                         </button>
                     })}
@@ -63,8 +74,13 @@ const ColorSelector = ({ control, errors}: any) => {
                             <button
                                 type="button"
                                 onClick={() => {
-                                    setCustomColors([...customColors, newColor]);
+                                    // store custom colors normalized to lowercase
+                                    const lc = newColor.toLowerCase();
+                                    setCustomColors([...customColors, lc]);
                                     setShowColorPicker(false);
+                                    // auto-select the newly added color
+                                    const values = (field.value || []) || [];
+                                    field.onChange([...(values || []), lc]);
                                 }}
                                 className="px-2 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
                             >

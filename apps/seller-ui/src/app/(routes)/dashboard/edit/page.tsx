@@ -1,5 +1,5 @@
 "use client"
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { ChevronRight, Wand, X } from 'lucide-react';
 import ImagePlaceHolder from 'apps/seller-ui/src/share/components/image-placeholder';
@@ -14,14 +14,7 @@ import SizeSelector from 'apps/seller-ui/src/share/components/size-selector';
 import Link from 'next/link';
 import Image from 'next/image';
 import { enhancements } from 'apps/seller-ui/src/utils/AI.enhancements';
-// navigation: use window.location for navigation in this client component to avoid
-// `NextRouter was not mounted` issues in some HMR/dev setups.
 import toast from 'react-hot-toast';
-
-interface UploadedImage {
-  fileId: string;
-  file_url: string;
-}
 
 const page = () => {
   const { 
@@ -34,29 +27,41 @@ const page = () => {
     formState: { errors },
   } = useForm();
   const [openImageModal, setOpenImageModal] = useState(false);
-  const [isChanged, setIsChanged] = useState(true)
-  const [activeEffect, setActiveEffect] = useState<string | null>(null);
+  const [isChanged] = useState(true)
   const [selectedImage, setSelectedImage] = useState("")
   const [pictureUploadingLoader, setPictureUploadingLoader] = useState(false)
-  const [images, setImages] = useState<(UploadedImage | null)[]>([null]);
+  const [images, setImages] = useState<any[]>([null]);
   const [loading, setLoading] = useState(false);
+  const [activeEffect, setActiveEffect] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false)
   const [disabledEffects, setDisabledEffects] = useState<string[]>([]);
 
- const {data, isLoading, isError} = useQuery<{ categories?: any[]; subCategories?: any[] }>({
-  queryKey: ['categories'],
-  queryFn: async () => {
-    try {
-      const res = await axiosInstance.get("/product/api/get-categories");
-      return res?.data ?? { categories: [], subCategories: [] };
-    } catch (error) {
-      console.error(error);
-      throw error;
+  // extract id from path
+  const [productId, setProductId] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const parts = window.location.pathname.split('/').filter(Boolean);
+      const id = parts[parts.length - 1];
+      setProductId(id);
     }
-  },
-  staleTime: 1000 * 60 * 5,
-  retry: 2,
-});
+  }, []);
+
+ const {data, isLoading, isError} = useQuery<{ categories?: any[]; subCategories?: any[] }>(
+  {
+    queryKey: ['categories'],
+    queryFn: async () => {
+      try {
+        const res = await axiosInstance.get("/product/api/get-categories");
+        return res?.data ?? { categories: [], subCategories: [] };
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    staleTime: 1000 * 60 * 5,
+    retry: 2,
+  }
+ );
 
   const { data: discountCodes = [], isLoading: isLoadingDiscountCodes } = useQuery({
           queryKey: ['shop-discount'],
@@ -66,49 +71,60 @@ const page = () => {
           }
   });  
 
-  const categories = data?.categories || [];
-  const subCategoriesData = data?.subCategories || [];
+ const categories = data?.categories || [];
+ const subCategoriesData = data?.subCategories || [];
 
-  const selectedCategory = watch("category");
-  const regularPrice = watch("regular_price");
+ const selectedCategory = watch("category");
+ const regularPrice = watch("regular_price");
 
   const subcategories = useMemo(() => {
     return selectedCategory ? subCategoriesData[selectedCategory] || []:[];
   },[selectedCategory, subCategoriesData]);
 
-  const onSubmit = async (data:any) => {
-  try {
-    setLoading(true);
-    const response = await axiosInstance.post('/product/api/create-product', data);
-    if (response.status === 201) {
-      // Use a hard redirect which works without Next router context
-      window.location.href = '/dashboard/all-products';
-    }
-  } catch (error: any) { 
-    const resp = error?.response?.data;
-    const message = resp?.message || resp?.error || error?.message || error?.response?.statusText || "Failed to create product. Please try again.";
-    // show toast for any server-provided message (e.g., 'Slug already exist!')
-    try { toast.error(String(message)); } catch (e) { console.warn('Toast failed', e); }
-    // If the server returned a missing required fields message, try to mark those fields in the form
-    try {
-      if (typeof message === 'string' && /missing required field/i.test(message)) {
-        const m = message.match(/missing required field\(s\):\s*(.*)/i);
-        if (m && m[1]) {
-          const fields = m[1].split(',').map((f: string) => f.trim());
-          fields.forEach((field: string) => {
-            // set a generic server error on the field so the UI highlights it
-            try { setError(field, { type: 'server', message: 'This field is required' }); } catch (e) { /* ignore unknown fields */ }
-          });
-        }
+  // load product data
+  useEffect(() => {
+    const load = async () => {
+      if (!productId) return;
+      try {
+        setLoading(true);
+        const res = await axiosInstance.get(`/product/api/get-product/${productId}`);
+        const product = res?.data?.product;
+        if (!product) return;
+
+        // set form values
+        setValue('title', product.title);
+        setValue('short_description', product.short_description);
+        setValue('detailed_description', product.detailed_description);
+        setValue('warranty', product.warranty);
+        setValue('slug', product.slug);
+        setValue('tags', (product.tags || []).join(','));
+        setValue('brand', product.brand);
+        setValue('category', product.category);
+        setValue('subcategory', product.subCategory);
+        setValue('video_url', product.video_url);
+        setValue('regular_price', product.regular_price);
+        setValue('sale_price', product.sale_price);
+        setValue('stock', product.stock);
+        setValue('sizes', product.sizes || []);
+        setValue('colors', product.colors || []);
+        setValue('discountCodes', product.discount_codes || []);
+        setValue('customProperties', product.custom_properties || {});
+        setValue('custom_specifications', product.custom_specifications || {});
+
+        const mappedImages = (product.images || []).map((img:any) => ({ fileId: img.file_id, file_url: img.url }));
+        if (mappedImages.length === 0) mappedImages.push(null);
+        if (mappedImages.length < 8 && !mappedImages.includes(null)) mappedImages.push(null);
+        setImages(mappedImages);
+        setValue('images', mappedImages);
+      } catch (err) {
+        console.error('Failed to load product for edit', err);
+        toast.error('Failed to load product');
+      } finally {
+        setLoading(false);
       }
-    } catch (e) {
-      // ignore parse errors
     }
-    console.error("Error creating product:", error);
-  } finally {
-    setLoading(false);
-  }
-}  
+    load();
+  }, [productId, setValue]);
 
   const convertFileToBase64 = (file: File) => {
     return new Promise((resolve, reject) => {
@@ -123,86 +139,41 @@ const page = () => {
     });
   };
 
-  const handleImageChange = async (file: File | null, index:number) => {
-
-    if (!file) return; 
-    setPictureUploadingLoader(true)
-
-
-    try {
-      const fileName = await convertFileToBase64(file);
-
-      const response = await axiosInstance.post("product/api/upload-product-image", {fileName} )
-      
-      const updatedImages = [...images];
-      const uploadedImage = {
-        fileId: response.data.fileId,
-        file_url: response.data.file_url,
-      }
-      updatedImages[index] = uploadedImage;
-
-      if (index === images.length - 1 && updatedImages.length < 8){
-        updatedImages.push(null)
-      }
-      setImages(updatedImages);
-      setValue("images", updatedImages);
-
-    } catch (error) {
-      console.error("Error uploading image:", error);
-    } finally {
-      setPictureUploadingLoader(false)
-
-    }
- };  
-  
- const handleImageRemove = async (index: number) => {
-  try {
-    const updatedImages = [...images];
-
-    const imageToDelete = updatedImages[index];
-    if (imageToDelete && typeof imageToDelete === "object"){
-      await axiosInstance.delete("product/api/delete-product-image", {
-        data: { fileId: imageToDelete.fileId },
-      });
-    }
-
-    updatedImages.splice(index, 1)
-
-    if(!updatedImages.includes(null) && updatedImages.length < 8) {
-      updatedImages.push(null);
-    }
-    setImages(updatedImages);
-    setValue("images", updatedImages)
-  } catch (error) {
-    console.log(error);
-  }
- };
-
  const applyTransformation = async(transformation: string) => {
   if(!selectedImage || processing) return;
-  // Clean existing tr params client-side as an extra layer of protection so we don't send
-  // malformed URLs like '?tr=...?...' which can produce upstream 400 responses.
   const cleaned = (selectedImage as string).replace(/[?&]tr=[^&?]*/g, '');
   setProcessing(true);
   setActiveEffect(transformation)
 
   try {
-    // Ask our server to validate the transform before setting the image in the UI.
-    // Server will perform HEAD/GET checks and return either transformedUrl or an error with diagnostics.
     const res = await axiosInstance.post('/product/api/transform-product-image', { imageUrl: cleaned, effect: transformation });
     if (res?.data?.transformedUrl) {
-      setSelectedImage(res.data.transformedUrl);
+      const transformedUrl = res.data.transformedUrl;
+      // find image index by matching current selectedImage to slot
+      const idx = images.findIndex((img:any) => {
+        if (!img) return false;
+        if (typeof img === 'string') return img === selectedImage;
+        return (img.file_url && img.file_url === selectedImage) || (img.url && img.url === selectedImage);
+      });
+      const updatedImages = [...images];
+      if (idx !== -1) {
+        const existing = updatedImages[idx] || {};
+        updatedImages[idx] = { fileId: existing.fileId || existing.file_id || existing.fileId || null, file_url: transformedUrl };
+      } else {
+        // fallback: replace first slot
+        updatedImages[0] = { fileId: updatedImages[0]?.fileId || updatedImages[0]?.file_id || null, file_url: transformedUrl };
+      }
+      setImages(updatedImages);
+      setValue('images', updatedImages);
+      setSelectedImage(transformedUrl);
     } else {
       console.warn('Transform endpoint did not return transformedUrl', res?.data);
     }
   } catch (err: any) {
-    // Map server diagnostics to user-visible messages; keep simple here.
     const status = err?.response?.status;
     const data = err?.response?.data;
     console.error('Transform request failed', status, data);
     if (status === 422) {
-      // Upstream indicated a non-image or extensions/limit — disable this effect on the client
-      // Inspect ik-error header if present to decide whether to persist disablement.
       const ikError: string | undefined = data?.details?.headers?.['ik-error'] || data?.details?.body;
       alert(data?.message || ikError || 'This enhancement is not supported for this image.');
       if (ikError && /ELIMIT|extensions|not have transparency/i.test(ikError)) {
@@ -237,65 +208,148 @@ const page = () => {
     }
   }, []);
 
- const handleSaveDraft = () => {
+  const handleImageChange = async (file: File | null, index:number) => {
+    if (!file) return; 
+    setPictureUploadingLoader(true)
 
- }
+    try {
+      const fileName = await convertFileToBase64(file);
+
+      const response = await axiosInstance.post("product/api/upload-product-image", {fileName} )
+      
+      const updatedImages = [...images];
+      const uploadedImage = {
+        fileId: response.data.fileId,
+        file_url: response.data.file_url,
+      }
+      updatedImages[index] = uploadedImage;
+
+      if (index === images.length - 1 && updatedImages.length < 8){
+        updatedImages.push(null)
+      }
+      setImages(updatedImages);
+      setValue("images", updatedImages);
+
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    } finally {
+      setPictureUploadingLoader(false)
+
+    }
+ };
+ 
+ const handleImageRemove = async (index: number) => {
+  try {
+    const updatedImages = [...images];
+
+    const imageToDelete = updatedImages[index];
+    if (imageToDelete && typeof imageToDelete === "object"){
+      await axiosInstance.delete("product/api/delete-product-image", {
+        data: { fileId: imageToDelete.fileId },
+      });
+    }
+
+    updatedImages.splice(index, 1)
+
+    if(!updatedImages.includes(null) && updatedImages.length < 8) {
+      updatedImages.push(null);
+    }
+    setImages(updatedImages);
+    setValue("images", updatedImages)
+  } catch (error) {
+    console.log(error);
+  }
+ };
+
+  const onSubmit = async (data:any) => {
+    if (!productId) { toast.error('Missing product id'); return; }
+    try {
+      setLoading(true);
+      const response = await axiosInstance.put(`/product/api/update-product/${productId}`, data);
+      if (response.status === 200) {
+        window.location.href = '/dashboard/all-products';
+        return;
+      }
+    } catch (error: any) {
+      const resp = error?.response?.data;
+      const message = resp?.message || resp?.error || "Failed to update product. Please try again.";
+      toast.error(message);
+      try {
+        if (typeof message === 'string' && /missing required field/i.test(message)) {
+          const m = message.match(/missing required field\(s\):\s*(.*)/i);
+          if (m && m[1]) {
+            const fields = m[1].split(',').map((f: string) => f.trim());
+            fields.forEach((field: string) => {
+              try { setError(field, { type: 'server', message: 'This field is required' }); } catch (e) { }
+            });
+          }
+        }
+      } catch (e) {}
+      console.error("Error updating product:", error);
+    } finally {
+      setLoading(false);
+    }
+    return;
+  }
+
   return (
     <form
       className='w-full mx-auto p-8 shadow-md rounded-lg text-white'
       onSubmit={handleSubmit(onSubmit)}
     >
       <h3 className='text-2xl font-bold mb-6'>
-        Create Product
+        Edit Product
       </h3>
-    <div className='flex items-center'>
-      <Link href={'/dashboard'} className='text-[#80Deea] cursor-pointer'>Dashboard</Link>
-      <ChevronRight className=' opacity-[.8]' size={14} />
-      <span className='text-[#80Deea] cursor-pointer'>Create Products</span>
-    </div>
+      <div className='flex items-center'>
+        <Link href={'/dashboard'} className='text-[#80Deea] cursor-pointer'>Dashboard</Link>
+        <ChevronRight className=' opacity-[.8]' size={14} />
+        <span className='text-[#80Deea] cursor-pointer'>Edit Product</span>
+      </div>
 
-    <div className='py-4 w-full flex gap-6'>
-      <div className='md:w-[35%]'>
-        {images?. length > 0 && (<ImagePlaceHolder
-          setOpenImageModal={setOpenImageModal}
-          size='765 x 850'
-          small={false}
-          images={images}
-          pictureUploadingLoader={pictureUploadingLoader}
-          index={0}
-          onImageChange={handleImageChange}
-          setSelectedImage={setSelectedImage}
-          onRemove={handleImageRemove}
-        />
-        )}
-        <div className='grid grid-cols-2 gap-3 mt-4'>
-        {images.slice(1).map((_, index) => (
-            <ImagePlaceHolder
-              key={index}
-              setOpenImageModal={setOpenImageModal}
-              size='765 x 850'
-              pictureUploadingLoader={pictureUploadingLoader}
-              small
-              images={images}
-              setSelectedImage={setSelectedImage}
-              index={index + 1}
-              onImageChange={handleImageChange}
-              onRemove={handleImageRemove}
-            />
-        ))}
-      </div>
-      </div>
-      
-      <div className='md:w-[65%]'>
-        <div className='w-full flex gap-4'>
-          <div className='w-2/4'>
-            <Input
-              label="Product Title *"
-              placeholder="Enter product title"
-              {...register("title", { required: "Product title is required" })}
-              className={`${errors.title ? "border-red-500" : ""}`}
-            />
-            <div className='mt-2'>
+      <div className='py-4 w-full flex gap-6'>
+        <div className='md:w-[35%]'>
+          {images?. length > 0 && (<ImagePlaceHolder
+            setOpenImageModal={setOpenImageModal}
+            size='765 x 850'
+            small={false}
+            images={images}
+            pictureUploadingLoader={pictureUploadingLoader}
+            index={0}
+            defaultImage={images[0] && typeof images[0] === 'object' ? images[0].file_url : null}
+            onImageChange={handleImageChange}
+            setSelectedImage={setSelectedImage}
+            onRemove={handleImageRemove}
+          />
+          )}
+          <div className='grid grid-cols-2 gap-3 mt-4'>
+          {images.slice(1).map((_:any, index:number) => (
+              <ImagePlaceHolder
+                key={index}
+                setOpenImageModal={setOpenImageModal}
+                size='765 x 850'
+                pictureUploadingLoader={pictureUploadingLoader}
+                small
+                images={images}
+                defaultImage={images[index + 1] && typeof images[index + 1] === 'object' ? images[index + 1].file_url : null}
+                setSelectedImage={setSelectedImage}
+                index={index + 1}
+                onImageChange={handleImageChange}
+                onRemove={handleImageRemove}
+              />
+          ))}
+          </div>
+        </div>
+
+        <div className='md:w-[65%]'>
+          <div className='w-full flex gap-4'>
+            <div className='w-2/4'>
+              <Input
+                label="Product Title *"
+                placeholder="Enter product title"
+                {...register("title", { required: "Product title is required" })}
+                className={`${errors.title ? "border-red-500" : ""}`}
+              />
+              <div className='mt-2'>
               <Input
                 type="textarea"
                 rows={4}
@@ -477,7 +531,6 @@ const page = () => {
                   rules={{
                     required: "Detailed description is required",
                     validate: (value) => {
-                      // value may contain HTML from the rich text editor; strip tags first
                       const text = (value || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ');
                       const normalized = text.replace(/\s+/g, ' ').trim();
                       const wordCount = normalized ? normalized.split(' ').filter((w: string) => w).length : 0;
@@ -608,22 +661,18 @@ const page = () => {
                   ) : (
                     <div className='flex flex-wrap gap-2'>
                       {discountCodes.map((code: any) => (
-                        <button 
-                          key={code.id} 
+                        <button
+                          key={code.id}
                           type='button'
-                          className={`px-3 py-1 rounded-md text-sm font-semibold border ${watch(
-                            "discountCodes"
-                          )?.includes(code.id) ? "bg-blue-600 text-white border-blue-600" : "bg-gray-800 text-gray-600 hover:bg-gray-700"
-                        }`}
-                        onClick={() => {
-                          const CurrentSelection = watch("discountCodes") || [];
-                          const updatedSelection = CurrentSelection?.includes(
-                            code.id
-                          ) ? CurrentSelection.filter((id:string) => id !== code.id) 
-                          : [...CurrentSelection,code.id];
-                          setValue("discountCodes", updatedSelection);
-                        }}
-                          >
+                          className={`px-3 py-1 rounded-md text-sm font-semibold border ${watch("discountCodes")?.includes(code.id) ? "bg-blue-600 text-white border-blue-600" : "bg-gray-800 text-gray-600 hover:bg-gray-700"}`}
+                          onClick={() => {
+                            const CurrentSelection = watch("discountCodes") || [];
+                            const updatedSelection = CurrentSelection?.includes(code.id)
+                              ? CurrentSelection.filter((id: string) => id !== code.id)
+                              : [...CurrentSelection, code.id];
+                            setValue("discountCodes", updatedSelection);
+                          }}
+                        >
                           {code?.public_name}({code.discountValue}{code.discountType == "percentage" ? "%" : "$"})
                         </button>
                       ))}
@@ -631,9 +680,10 @@ const page = () => {
                   )}
               </div>
           </div>
-      </div>    
+      </div>
     </div>
-    </div>  
+    </div>
+
     {openImageModal && (
       <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50'>
         <div className='bg-gray-800 p-6 rounded-lg w-[450px] text-white'>
@@ -655,7 +705,6 @@ const page = () => {
               alt='product-image'
               style={{ objectFit: 'contain' }}
               layout='fill'
-              // Bypass Next.js image proxy for ImageKit transformed URLs to avoid proxy 500s.
               unoptimized={
                 typeof selectedImage === 'string' && (
                   selectedImage.includes('ik.imagekit.io') || selectedImage.includes('tr=')
@@ -692,27 +741,27 @@ const page = () => {
         </div>
       </div>
     )}
-    <div className="mt-6 flex justify-end gap-3">
-        {isChanged && (
+
+      <div className="mt-6 flex justify-end gap-3">
+          {isChanged && (
+            <button
+              type="button"
+              onClick={() => toast('Draft saved (client-only)')}
+              className='px-4 py-2 bg-gray-700 text-white rounded-md'
+            >
+              Save Draft
+            </button>
+          )}
           <button
-            type="button"
-            onClick={handleSaveDraft}
-            className='px-4 py-2 bg-gray-700 text-white rounded-md'
+          type='submit'
+          className='px-4 py-2 bg-blue-600 text-white rounded-md'
+          disabled={loading}
           >
-            Save Draft
+            {loading ? 'Updating...' : 'Update'}
           </button>
-        )}
-        <button
-        type='submit'
-        className='px-4 py-2 bg-blue-600 text-white rounded-md'
-        disabled={loading}
-        >
-          {loading ? 'Creating...' : 'Create'}
-        </button>
-    </div>
+      </div>
     </form>
   );
-}; 
+}
 
-export default page
- 
+export default page;

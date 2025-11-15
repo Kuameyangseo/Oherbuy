@@ -101,9 +101,9 @@ const CustomProperties = ({control, errors}:any) => {
                                       <Plus size={20} /> Add
                                     </button>
                                 </div>
-                                {errors.custom_specifications && (
+                                {errors.custom_properties && (
                                 <p className="text-red-500 text-sm mt-1">
-                                    {errors.custom_specifications.message}
+                                    {errors.custom_properties.message}
                                 </p>
                             )}
                             </div>

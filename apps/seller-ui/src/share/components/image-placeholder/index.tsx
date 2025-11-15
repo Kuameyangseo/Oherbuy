@@ -1,25 +1,37 @@
 import { Pencil, WandSparkles, X } from 'lucide-react';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { toast } from 'react-hot-toast';
 
 
 const ImagePlaceHolder = ({
   size,
   small,
   onImageChange,
+  pictureUploadingLoader,
   onRemove,
   defaultImage = null,
-  index = undefined,
+  index = null,
+  setSelectedImage,
   setOpenImageModal,
+  images,
 }:{
     size: string;
     small?: boolean;
+    pictureUploadingLoader: boolean;
     onImageChange: (file: File | null, index: number) => void;
     onRemove: (index: number) => void;
     defaultImage?: string | null;
+    setSelectedImage: (e: string) => void;
     index?: any;
+    images: any
     setOpenImageModal: (openImageModal: boolean) => void;
 }) => {
   const [imagePreview, setImagePreview] = useState<string | null>(defaultImage);
+
+  // Keep internal preview in sync when parent provides a new defaultImage
+  useEffect(() => {
+    setImagePreview(defaultImage ?? null);
+  }, [defaultImage]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,6 +62,7 @@ const ImagePlaceHolder = ({
         <>
           <button
             type="button"
+            disabled={pictureUploadingLoader}
             onClick={handleRemove}
             className="absolute top-2 right-2 z-10 bg-red-500 text-white rounded-full p-1 text-sm hover:bg-red-600"
             aria-label="Remove image"
@@ -59,7 +72,18 @@ const ImagePlaceHolder = ({
 
           <button
             type="button"
-            onClick={() => setOpenImageModal(true)}
+            disabled={pictureUploadingLoader}
+            onClick={() => {
+              // Defensive: ensure we have an image URL before opening editor
+              const img = images?.[index];
+              const url = img && typeof img === 'object' ? img.file_url : null;
+              if (!url) {
+                toast.error('No uploaded image available to enhance. Please upload an image first.');
+                return;
+              }
+              setOpenImageModal(true);
+              setSelectedImage(url);
+            }}
             className="absolute top-3 right-[70px] p-2 rounded bg-blue-500 shadow-lg text-white"
             aria-label="Edit image"
           >

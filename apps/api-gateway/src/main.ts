@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { ipKeyGenerator } from 'express-rate-limit';
 import proxy from 'express-http-proxy';
+import inititializeSiteConfig from './libs/initializeSiteConfig';
 
 const app = express();
 
@@ -40,11 +41,24 @@ app.get('/gateway-health', (req, res) => {
   res.send({ message: 'Welcome to api-gateway!' });
 });
 
+// Support both singular and plural prefixes for product service so client code
+// using either `/product` or `/products` will be proxied correctly to the
+// product-service running on port 6002.
+app.use("/product", proxy("http://localhost:6002"));
+app.use("/orders", proxy("http://localhost:6003"));
 app.use("/", proxy("http://localhost:6001"));
+
+
 
 const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
   console.log(`API gateway is running at http://localhost:${port}/api-gateway`);
+  try {
+    inititializeSiteConfig()
+    console.log("site config initialized successfully")
+  } catch (error) {
+     console.log("Fail to initialized site config", error)
+  }
 });
 server.on('error', console.error);
   

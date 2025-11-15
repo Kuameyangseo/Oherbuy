@@ -18,7 +18,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
         return (
             <div className={`flex flex-col w-full ${className || ''}`}>
                 {label && (
-                    <label className="mb-2 font-medium text-gray-700">{label}</label>
+                    <label className="mb-2 font-medium text-gray-300">{label}</label>
                 )}
 
                 {type === "textarea" ? (

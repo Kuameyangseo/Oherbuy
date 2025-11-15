@@ -10,6 +10,16 @@ const nextConfig = {
   // Use this to set Nx-specific options
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'ik.imagekit.io',
+        // allow any path under the ImageKit host
+        pathname: '/:path*',
+      }
+    ]
+  }
 };
 
 const plugins = [
