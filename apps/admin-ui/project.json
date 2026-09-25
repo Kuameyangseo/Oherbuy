@@ -1,0 +1,27 @@
+{
+  "name": "admin-ui",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/admin-ui/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/admin-ui",
+        "root": "apps/admin-ui"
+      },
+      "configurations": { "production": {} }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx next dev",
+        "cwd": "apps/admin-ui",
+        "parallel": false,
+        "env": { "NX_DAEMON": "false" }
+      }
+    }
+  },
+  "tags": ["scope:admin"]
+}

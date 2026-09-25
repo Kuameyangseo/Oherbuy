@@ -7,6 +7,7 @@ import {useForm} from 'react-hook-form';
 import { Eye, EyeOff} from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
+import axiosInstance from 'apps/seller-ui/src/utils/axiosinstance';
 
 type formData = {
   email: string;
@@ -26,11 +27,12 @@ const Login = () => {
 
   const loginMutation = useMutation({
     mutationFn: async(data: formData) => {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URI}/api/login-seller`, 
-        data,
-        { withCredentials: true }
-        
-      );
+      const response = await axiosInstance.post('/api/login-seller', data);
+      const accessToken = response.data?.accessToken;
+      if (accessToken) {
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+        window.localStorage.setItem('seller-access-token', accessToken);
+      }
       return response.data;
     },
     onSuccess: () => {

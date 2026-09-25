@@ -1,7 +1,10 @@
 "use client"
-import React, { useRef, useState, } from 'react'
-import './pagestyle.css';
 import { useRouter } from 'next/navigation';
+import React, { useRef, useState, } from 'react'
+// The stylesheet is handled by Next.js at runtime; suppress TypeScript's
+// missing declaration warning for this side-effect CSS import.
+// @ts-expect-error CSS files do not have a TypeScript declaration in this project.
+import './pagestyle.css';
 import {useForm} from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import axios, { AxiosError } from 'axios';
@@ -29,7 +32,7 @@ const ForgotPassword = () => {
 
   const requestOtpMutation = useMutation({
     mutationFn: async({email}: {email: string}) => {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URI}/api/forgot-user-password`, 
+      const response = await axios.post('/api/forgot-user-password',
         {email}
       );
       return response.data;
@@ -71,7 +74,7 @@ const ForgotPassword = () => {
     mutationFn: async() => {
       if (!userEmail) return;
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_URI}/api/verify-forgot-user`,
+        '/api/verify-forgot-user',
         {
           ...userEmail && {email: userEmail},
           otp: otp.join(""),
@@ -96,7 +99,7 @@ const ForgotPassword = () => {
     mutationFn: async ({ password }: { password: string }) => {
       if (!userEmail) return;
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_URI}/api/reset-password-user`,
+        '/api/reset-password-user',
         {
           ...userEmail && {email: userEmail},
           newPassword: password,

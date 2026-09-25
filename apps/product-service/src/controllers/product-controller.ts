@@ -14,12 +14,48 @@ export const getCategories = async (
     try {
         const config = await prisma.site_config.findFirst();
 
-        if (!config) {
-            return res.status(404).json({ message: 'Site configuration not found' });
+        const defaults = {
+            categories: [
+                "Cannabis sativa",
+                "Cannabis indica",
+                "Cannabis ruderalis",
+                "Cannabis hybrids",
+            ],
+            subCategories: {
+                "Cannabis sativa": ["Purple Haze", "Sour Diesel", "Haze", "Northern Lights", "Acapulco Gold"],
+                "Cannabis indica": ["Kush", "Holland's hope"],
+                "Cannabis ruderalis": ["Auto-flower"],
+                "Cannabis hybrids": [
+                    "Blue Dream",
+                    "Girl Scout Cookies (GSC)",
+                    "White Widow",
+                    "Bruce Banner",
+                    "Pineapple Express",
+                    "OG Kush",
+                ]
+            }
         }
+
+        const normalizeSubCategories = (raw: unknown): Record<string, string[]> => {
+            if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+
+            return Object.fromEntries(
+                Object.entries(raw).map(([category, values]) => [
+                    category,
+                    Array.isArray(values)
+                        ? values.filter((value): value is string => typeof value === 'string' && Boolean(value))
+                        : [],
+                ])
+            );
+        };
+
+        const rawSub = config ? config.subCategories : defaults.subCategories;
+        const subCategories = normalizeSubCategories(rawSub);
+        const cats = config && Array.isArray(config.categories) ? config.categories : defaults.categories;
+
         return res.status(200).json({
-            categories: config.categories,
-            subCategories: config.subCategories
+            categories: cats,
+            subCategories
         });
     } catch (error) {
         return next(error)
@@ -377,9 +413,11 @@ export const createProduct = async (
         // Defensive check: req.seller may be undefined when the auth middleware
         // did not populate it. Use optional chaining to avoid a crash and
         // return a ValidationError that will be handled by the error middleware.
-        if (!req.seller?.id) {
-            return next(new ValidationError("Only seller can create products!"));
+        if (!req.seller?.id && req.role !== 'admin') {
+            return next(new ValidationError("Only admin can create products!"));
         }
+
+        const shopId = req.seller?.shop?.id;
 
         const slugChecking = await prisma.products.findUnique({
             where: {
@@ -407,7 +445,7 @@ export const createProduct = async (
                     warranty,
                     cashOnDelivery: cash_on_delivery,
                     slug,
-                    shopId: req.seller?.shop?.id!,
+                    shopId,
                     tags: Array.isArray(tags) ? tags : tags.split(","),
                     brand,
                     video_url,
@@ -447,7 +485,7 @@ export const createProduct = async (
                         warranty,
                         cashOnDelivery: cash_on_delivery,
                         slug,
-                        shopId: req.seller?.shop?.id!,
+                        shopId,
                         tags: Array.isArray(tags) ? tags : tags.split(","),
                         brand,
                         video_url,
@@ -570,7 +608,7 @@ export const updateProduct = async (req: any, res: Response, next: NextFunction)
         const existing = await prisma.products.findUnique({ where: { id }, include: { images: true } });
         if (!existing) return next(new ValidationError('Product not found'));
 
-        if (!req.seller?.shop?.id || existing.shopId !== req.seller.shop.id) {
+        if (req.role !== 'admin' && (!req.seller?.shop?.id || existing.shopId !== req.seller.shop.id)) {
             return next(new ValidationError('Unauthorized to edit this product'));
         }
         // Merge incoming fields with existing product so partial updates keep previously stored values

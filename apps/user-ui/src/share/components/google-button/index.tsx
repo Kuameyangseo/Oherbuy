@@ -2,7 +2,7 @@ import * as React from "react";
 
 const GoogleButton = () => {
     const handleGoogleSignIn = () => {
-        window.location.href = `${process.env.NEXT_PUBLIC_SERVER_URI}/api/auth/google`;
+        window.location.href = '/api/auth/google';
     };
 
     return (

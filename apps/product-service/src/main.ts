@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -11,7 +13,7 @@ import swaggerDocument from './swagger-output.json';
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:3000"],
+  origin: ["http://localhost:6002"],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }));

@@ -32,8 +32,9 @@
     "**/*.tsx",
     "../../apps/user-ui/.next/types/**/*.ts",
     "../../dist/apps/user-ui/.next/types/**/*.ts",
+    ".next/types/**/*.ts",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
+    ".next-prod/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

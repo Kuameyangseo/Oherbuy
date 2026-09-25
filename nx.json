@@ -1,5 +1,9 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "useDaemonProcess": false,
+  "tui": {
+        "enabled": false
+         },
   "plugins": [
     {
       "plugin": "@nx/webpack/plugin",
@@ -11,6 +15,7 @@
         "watchDepsTargetName": "watch-deps",
         "serveStaticTargetName": "serve-static"
       }
+      
     }
   ]
 }

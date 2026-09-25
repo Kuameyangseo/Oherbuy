@@ -1,7 +1,9 @@
+// @ts-expect-error The stylesheet is handled by Next.js at runtime.
 import './global.css';
 import Header from "../share/widget/header"
 import {Oswald, Poppins, Roboto} from "next/font/google"
 import Providers from '../providers';
+import Footer from "../share/widget/footer/footer";
 
 
 
@@ -40,6 +42,7 @@ export default function RootLayout({
         <Providers>
           <Header/>
           {children}
+          <Footer />
         </Providers>
         </body>
     </html>

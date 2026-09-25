@@ -46,13 +46,13 @@ const page = () => {
     }
   }, []);
 
- const {data, isLoading, isError} = useQuery<{ categories?: any[]; subCategories?: any[] }>(
+ const {data, isLoading, isError} = useQuery<{ categories?: string[]; subCategories?: Record<string, string[]> }>(
   {
     queryKey: ['categories'],
     queryFn: async () => {
       try {
         const res = await axiosInstance.get("/product/api/get-categories");
-        return res?.data ?? { categories: [], subCategories: [] };
+        return res?.data ?? { categories: [], subCategories: {} };
       } catch (error) {
         console.error(error);
         throw error;
@@ -72,7 +72,7 @@ const page = () => {
   });  
 
  const categories = data?.categories || [];
- const subCategoriesData = data?.subCategories || [];
+ const subCategoriesData = data?.subCategories || {};
 
  const selectedCategory = watch("category");
  const regularPrice = watch("regular_price");
@@ -215,7 +215,7 @@ const page = () => {
     try {
       const fileName = await convertFileToBase64(file);
 
-      const response = await axiosInstance.post("product/api/upload-product-image", {fileName} )
+      const response = await axiosInstance.post("/product/api/upload-product-image", {fileName} )
       
       const updatedImages = [...images];
       const uploadedImage = {

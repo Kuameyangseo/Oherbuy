@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -61,7 +63,7 @@ app.use(errorMiddleware);
 const port = process.env.PORT || 6003;
 const server = app.listen(port, () => {
   console.log(`Order service is runing at http://localhost:${port}/api-docs`);
-  console.log(`Swagger docs runing at http://localhost:${port}/docs`);
+  console.log(`Order Swagger docs runing at http://localhost:${port}/docs`);
 });
 server.on('error', (err) => {
   console.log("server Error:", err)

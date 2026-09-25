@@ -1,13 +1,24 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_SERVER_URI || 'http://localhost:8080',
+  baseURL: process.env.NEXT_PUBLIC_SERVER_URI || '',
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
 
 let isRefreshing = false;
 let refreshSubscribers: ((value?: any) => void)[] = [];
+
+axiosInstance.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const accessToken = window.localStorage.getItem('seller-access-token');
+    if (accessToken) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+  }
+  return config;
+});
 
 const handleLogout = () => {
   if (window.location.pathname !== '/login') {
@@ -56,6 +67,7 @@ axiosInstance.interceptors.response.use(
         const accessToken = res?.data?.accessToken;
         if (accessToken) {
           axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+          window.localStorage.setItem('seller-access-token', accessToken);
         }
 
         onRefreshSuccess(accessToken);

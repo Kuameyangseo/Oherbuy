@@ -14,6 +14,7 @@ import {
 	updateProduct,
 } from '../controllers/product-controller';
 import isAuthenticated from '../../../../packages/middleware/isAuthenticated';
+import requireAdmin from '../../../../packages/middleware/requireAdmin';
 
 
 const router = express.Router();
@@ -26,9 +27,9 @@ router.post('/upload-product-image', isAuthenticated, uploadProductImage)
 router.post('/transform-product-image', transformProductImage)
 router.delete("/delete-product-image", isAuthenticated, deleteProductImage)
 router.delete('/delete-product/:id', isAuthenticated, deleteProduct)
-router.post("/create-product", isAuthenticated, createProduct)
+router.post("/create-product", requireAdmin, createProduct)
 router.get("/get-shop-products", isAuthenticated, getShopProducts)
 router.get('/get-product/:id', isAuthenticated, getProduct)
-router.put('/update-product/:id', isAuthenticated, updateProduct)
+router.put('/update-product/:id', requireAdmin, updateProduct)
 
 export default router;

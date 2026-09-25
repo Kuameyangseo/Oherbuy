@@ -1,11 +1,11 @@
 "use client"
-import React, { useState } from 'react'
-import './pagestyle.css';
-import Link from 'next/link'
 import { useRouter } from 'next/navigation';
+import React, { useState } from 'react'
+import Link from 'next/link'
 import {useForm} from 'react-hook-form';
 import { Eye, EyeOff} from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import GoogleButton from 'apps/user-ui/src/share/components/google-button';
 
@@ -14,11 +14,19 @@ type formData = {
   password: string;
 };
 
+const backgroundStyle = {
+  backgroundImage: "url(/images/background1.jpg)",
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+}
+
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const {
     register, handleSubmit,
@@ -27,14 +35,32 @@ const Login = () => {
 
   const loginMutation = useMutation({
     mutationFn: async(data: formData) => {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URI}/api/login-user`, 
+      const response = await axios.post('/api/login-user',
         data,
         { withCredentials: true }
       );
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setServerError(null);
+      // If the login response includes account/user info, write it directly
+      // into the 'account' query so UI updates immediately.
+      try {
+        const accountPayload = (data && (data.account || data.user)) || data;
+        if (accountPayload) {
+          queryClient.setQueryData(['account'], accountPayload);
+        }
+        // Also update the 'user' cache when user information is present so
+        // header components using `useUser` update immediately.
+        const userPayload = (data && (data.user || data.account)) || data;
+        if (userPayload) {
+          queryClient.setQueryData(['user'], userPayload);
+        }
+      } catch (e) {
+        // ignore cache set failures
+      }
+      // still trigger a background refetch to ensure freshness
+      queryClient.invalidateQueries({ queryKey: ['account'] });
       router.push('/');
     },
     onError: (error: any) => {
@@ -51,15 +77,17 @@ const Login = () => {
   };
 
   return (
-  <div className='w-full py-10 min-h-[85vh] bg-[#f1f1f1]'>
-    <h1 className='text-3xl font-bold text-center mb- font-poppins'>
+  <div 
+    style={backgroundStyle}
+    className='w-full py-10 min-h-[85vh]'>
+    <h1 className='text-3xl font-bold text-center mb- font-poppins text-white'>
       Login
     </h1>
-    <p className='text-center text-gray-500 font-medium py-2 font-poppins'>
+    <p className='text-center text-white font-medium py-2 font-poppins'>
       Home . Login
     </p>
     <div className='w-full flex justify-center'>
-      <div className='md:w-[480px] p-8 bg-white rounded-lg shadow-lg '>
+      <div className='md:w-[480px] p-8 bg-white rounded-lg shadow-lg opacity-95'>
         <h3 className='text-2xl font-semibold text-center mb-2 font-poppins'>
           Login To OherBuy
         </h3>

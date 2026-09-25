@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "out-tsc/admin-service",
+    "types": ["node", "express"],
+    "rootDir": "../../",
+    "tsBuildInfoFile": "out-tsc/admin-service/tsconfig.app.tsbuildinfo",
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "../../packages/**/*.ts"
+  ],
+  "exclude": [
+    "out-tsc",
+    "dist",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts"
+  ]
+}

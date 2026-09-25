@@ -8,7 +8,7 @@ import React, { useEffect } from 'react'
 import { Sidebar } from './sidebar.style';
 import Link from 'next/link';
 import Logo from 'apps/seller-ui/src/assets/svgs/logo';
-import { LayoutDashboard, ListOrdered, CreditCard, SquarePlus, PackageSearch, CalendarPlus, BellPlus, Mail, Settings, BellRing, TicketPercent, LogOut    } from 'lucide-react';
+import { LayoutDashboard, ListOrdered, CreditCard, SquarePlus, PackageSearch, CalendarPlus, BellPlus, Mail, Settings, BellRing, TicketPercent, Home } from 'lucide-react';
 import SidebarItem from './sidebar.item';
 import SidebarMenu from './sidebar.menu';
 
@@ -132,10 +132,10 @@ const SidebarBarWrapper = () => {
             href="/dashboard/discount-codes"
           />
           <SidebarItem
-            title="Logout"
-            icon={<LogOut fill={getIconColor("/dashboard/logout")} />}
-            isActive={activeSidebar=="/dashboard/logout"}
-            href="/login"
+            title="Home"
+            icon={<Home fill={getIconColor("/")} />}
+            isActive={activeSidebar=="/"}
+            href="/"
           />
 
         </SidebarMenu>

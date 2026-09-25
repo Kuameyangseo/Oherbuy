@@ -14,6 +14,12 @@ type FormData = {
   email: string;
   password: string;
 };
+const backgroundStyl = {
+    backgroundImage: "url(/images/background2.jpg)",
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+}
 
 const Signup = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -23,6 +29,7 @@ const Signup = () => {
   const [showOtp, setShowOtp] =useState(false);
   const [userData, setUserData] =useState<FormData | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
 
 
   const router = useRouter();
@@ -52,7 +59,7 @@ const Signup = () => {
   const signupMutation = useMutation({
     mutationFn: async(data: FormData) => {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_URI}/api/user-registration`,
+        '/api/user-registration',
         data
       );
       return response.data;
@@ -67,13 +74,13 @@ const Signup = () => {
   });
 
   const verifyOtpMutation = useMutation({
-    mutationFn: async() => {
+    mutationFn: async(verificationOtp?: string) => {
       if (!userData) return;
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_URI}/api/verify-user`,
+        '/api/verify-user',
         {
           ...userData,
-          otp: otp.join(""),
+          otp: verificationOtp || otp.join(""),
         }
       );
       return response.data
@@ -99,7 +106,7 @@ const handleOtpChange = (index: number, value: string) => {
 
     // Automatically verify OTP when all digits are entered
     if (newOtp.every(digit => digit !== "")) {
-      verifyOtpMutation.mutate();
+      verifyOtpMutation.mutate(newOtp.join(""));
     }
   }
 };
@@ -114,15 +121,17 @@ const handleOtpKeyDown = (index: number, event: React.KeyboardEvent<HTMLInputEle
 };
 
   return (
-  <div className='w-full py-10 min-h-[85vh] bg-[#f1f1f1]'>
-    <h1 className='text-3xl font-bold text-center mb- font-poppins'>
+  <div 
+    style={backgroundStyl} 
+    className='w-full py-10 min-h-[85vh]'>
+    <h1 className='text-3xl font-bold text-center mb- font-poppins text-white'>
       Signup
     </h1>
-    <p className='text-center text-gray-500 font-medium py-2 font-poppins'>
+    <p className='text-center text-white font-medium py-2 font-poppins'>
       Home . Signup
     </p>
     <div className='w-full flex justify-center'>
-      <div className='md:w-[480px] p-8 bg-white rounded-lg shadow-lg '>
+      <div className='md:w-[480px] p-8 bg-white rounded-lg shadow-lg opacity-95'>
         <h3 className='text-2xl font-semibold text-center mb-2 font-poppins'>
           Signup To OherBuy
         </h3>

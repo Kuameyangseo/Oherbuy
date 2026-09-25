@@ -10,10 +10,18 @@ import prisma from "../../packages/libs/prisma";
 
 const isAuthenticated = async(req: any, res: Response, next: NextFunction) => {
     try {
-        const token = 
-        req.cookies["access-token"]|| 
-        req.cookies["seller-access-token"] || 
-        req.headers.authorization?.split(" ")[1];
+        // allow client to indicate which role should be active via a cookie `active-role`
+        // if present prefer the token for that role, otherwise fall back to current order
+        const activeRole = req.cookies['active-role'];
+        let token: string | undefined;
+
+        if (activeRole === 'seller') {
+            token = req.cookies['seller-access-token'] || req.headers.authorization?.split(" ")[1];
+        } else if (activeRole === 'user') {
+            token = req.cookies['access-token'] || req.headers.authorization?.split(" ")[1];
+        } else {
+            token = req.cookies['access-token'] || req.cookies['seller-access-token'] || req.headers.authorization?.split(" ")[1];
+        }
 
         if (!token) {
             return res.status(401).json({ 

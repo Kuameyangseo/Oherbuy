@@ -3,6 +3,9 @@
  * This is only a minimal backend to get started.
  */
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import * as path from 'path';
 

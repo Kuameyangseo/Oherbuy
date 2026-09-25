@@ -1,3 +1,10 @@
 {
-    "nxConsole.generateAiAgentRules": true
+    "nxConsole.generateAiAgentRules": true,
+    "mdb.presetConnections": [
+        {
+            "name": "Preset Connection",
+            "connectionString": "mongodb://localhost:27017"
+        }
+    ],
+    "prisma.pinToPrisma6": true
 }
