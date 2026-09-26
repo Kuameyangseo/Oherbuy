@@ -1,0 +1,74 @@
+
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Order Confirmation</title>
+		<style>
+			body { font-family: Arial, Helvetica, sans-serif; background:#f6f8fa; color:#333; }
+			.container { max-width:700px; margin:28px auto; background:#fff; padding:24px; border-radius:8px; }
+			h1 { color:#111827; font-size:20px; }
+			table { width:100%; border-collapse:collapse; margin-top:12px }
+			th, td { padding:8px 6px; text-align:left; border-bottom:1px solid #e6e8eb }
+			.total { font-weight:700; font-size:16px }
+			.muted { color:#6b7280 }
+			.footer { margin-top:20px; font-size:13px; color:#6b7280 }
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>Thanks for your order!</h1>
+			<p class="muted">Order <strong>#<%= order.id %></strong> placed on <%= (order.createdAt ? new Date(order.createdAt).toLocaleString() : '') %></p>
+
+			<h2 style="font-size:16px; margin-top:18px">Order summary</h2>
+
+			<table>
+				<thead>
+					<tr>
+						<th>Item</th>
+						<th>Qty</th>
+						<th>Price</th>
+						<th>Subtotal</th>
+					</tr>
+				</thead>
+				<tbody>
+					<% ( (order.items && order.items.length) ? order.items : (order.products || []) ).forEach(function(item){ %>
+						<tr>
+							<td><%= item.name || item.productName || item.title || 'Item' %></td>
+							<td><%= item.quantity || item.qty || 1 %></td>
+							<td>$<%= (item.price || item.sale_price || 0).toFixed ? (item.price || item.sale_price || 0).toFixed(2) : Number(item.price || item.sale_price || 0).toFixed(2) %></td>
+							<td>$<%= ((item.price || item.sale_price || 0) * (item.quantity || item.qty || 1)).toFixed(2) %></td>
+						</tr>
+					<% }) %>
+				</tbody>
+				<tfoot>
+					<tr>
+						<td colspan="3" class="total">Total</td>
+						<td class="total">$<%= Number(order.totalAmount || order.total || 0).toFixed(2) %></td>
+					</tr>
+				</tfoot>
+			</table>
+
+			<div style="margin-top:18px">
+				<h3 style="margin:0 0 8px 0">Shipping address</h3>
+				<div class="muted">
+					<% if (order.shippingAddress) { %>
+						<div><%= order.shippingAddress.name || order.shippingAddress.recipient || '' %></div>
+						<div><%= order.shippingAddress.line1 || order.shippingAddress.address || '' %></div>
+						<div><%= order.shippingAddress.city || '' %> <%= order.shippingAddress.postalCode || '' %></div>
+						<div><%= order.shippingAddress.country || '' %></div>
+					<% } else { %>
+						<div>N/A</div>
+					<% } %>
+				</div>
+			</div>
+
+			<div class="footer">
+				<p>If you have any questions about your order, reply to this email or contact our support team.</p>
+				<p>Thanks — the Oherbuy team</p>
+			</div>
+		</div>
+	</body>
+</html>
+

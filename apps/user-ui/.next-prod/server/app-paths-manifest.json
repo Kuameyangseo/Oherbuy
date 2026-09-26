@@ -1,0 +1,21 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/debug/echo/route": "app/api/debug/echo/route.js",
+  "/api/hello/route": "app/api/hello/route.js",
+  "/api/orders/route": "app/api/orders/route.js",
+  "/(routes)/cart/page": "app/(routes)/cart/page.js",
+  "/(routes)/checkout/page": "app/(routes)/checkout/page.js",
+  "/(routes)/login/page": "app/(routes)/login/page.js",
+  "/(routes)/order-success/page": "app/(routes)/order-success/page.js",
+  "/(routes)/productoverview/[slug]/page": "app/(routes)/productoverview/[slug]/page.js",
+  "/(routes)/productview/page": "app/(routes)/productview/page.js",
+  "/(routes)/profile/page": "app/(routes)/profile/page.js",
+  "/(routes)/signup/page": "app/(routes)/signup/page.js",
+  "/orders/page": "app/orders/page.js",
+  "/page": "app/page.js",
+  "/product-view/[slug]/page": "app/product-view/[slug]/page.js",
+  "/product/page": "app/product/page.js",
+  "/shop/[id]/page": "app/shop/[id]/page.js",
+  "/(routes)/forgot-password/page": "app/(routes)/forgot-password/page.js",
+  "/shop/page": "app/shop/page.js"
+}

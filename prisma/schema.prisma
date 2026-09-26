@@ -1,0 +1,179 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model images{
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  file_id String
+  url String
+  userId String? @db.ObjectId
+  shopId String? @db.ObjectId
+  productId String? @db.ObjectId
+  products products? @relation(fields: [productId], references: [id])
+
+}
+
+model users {
+  id        String   @id @map("_id") @db.ObjectId @default(auto())
+  createdAt DateTime @default(now())
+  email     String   @unique
+  name      String?
+  password  String
+  updatedAt DateTime @updatedAt
+  avatarId String? @db.ObjectId
+  following String[]
+  shopReviews shopReviews[]
+  country   String
+  // optional back-reference to central accounts
+  account accounts?
+}
+
+model shopReviews{
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId @unique
+  user  users  @relation(fields: [userId], references: [id])
+  rating Float
+  reviews String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  shopsId String @db.ObjectId
+  shops  shops? @relation(fields: [shopsId], references: [id])
+}
+
+model shops{
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  bio       String?
+  category  String
+  avatarId String? @db.ObjectId
+  coverBanner String?
+  address String
+  opening_hours String?
+  website String?
+  socialLinks Json[]
+  ratings Float @default(0)
+  reviews shopReviews[]
+  sellerId String? @unique @db.ObjectId   // changed to optional
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  seller sellers? @relation(fields: [sellerId], references: [id])
+
+  products products[]
+}
+model sellers {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  email     String   @unique
+  name      String?
+  country   String
+  password  String
+  updatedAt DateTime @updatedAt
+  phone_number String
+  stripeId String
+  shop    shops?
+  paystackSubaccount String?
+  // optional back-reference to central accounts
+  account accounts?
+}
+
+model site_config{
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  categories String[]
+  subCategories Json
+}
+
+model discountCodes{
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  public_name      String
+  discountType String?
+  discountValue Float
+  discountCode String @unique
+  sellerId String @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}  
+
+
+enum productStatus {
+  Active
+  Pending
+  Draft
+}
+
+model products{
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title                String
+  slug                 String @unique
+  category             String
+  subCategory          String
+  short_description    String
+  detailed_description String
+  images               images[]
+  video_url            String?
+  tags                 String[]
+  brand                String?
+  colors               String[]
+  sizes                String[]
+  starting_date        DateTime?
+  ending_date          DateTime?
+  stock                Int
+  sale_price           Float
+  regular_price        Float
+  ratings              Float @default(5)
+  warranty             String?
+  custom_specifications Json?
+  custom_properties    Json
+  isDeleted            Boolean? @default(false)
+  cashOnDelivery       String?
+  discount_codes       String[]  @db.ObjectId
+  status               productStatus @default(Active)
+  deletedAt            DateTime? 
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  shops shops? @relation(fields: [shopId], references: [id])
+  shopId String? @db.ObjectId
+  }
+
+// Central account mapping for SSO and unified identity
+model accounts {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  email String @unique
+  provider String?
+  providerId String? @unique
+  userId String? @db.ObjectId @unique
+  sellerId String? @db.ObjectId @unique
+  roles String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user users? @relation(fields: [userId], references: [id])
+  seller sellers? @relation(fields: [sellerId], references: [id])
+}
+
+// Orders persisted by order-service. Use `orderId` as the external identifier
+model orders {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId String @unique
+  total Float
+  status String
+  customerName String?
+  totalAmount Float
+  shippingAddress Json
+  products Json
+  email String
+  items Json
+  userId String? @db.ObjectId
+  sellerId String @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
